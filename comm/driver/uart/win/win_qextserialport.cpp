@@ -2,7 +2,6 @@
 //#include <Process.h>
 //#include <QCoreApplication>
 //#include <QEvent>
-#if _WIN32
 #include <QReadWriteLock>
 #include "win_qextserialport.h"
 
@@ -1048,4 +1047,3 @@ void Win_QextSerialThread::run()
 		qesp->monitorCommEvent();
 	terminate = false;
 }
-#endif

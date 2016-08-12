@@ -1,4 +1,3 @@
-#if _WIN32
 #include "qextserialbase.h"
 
 
@@ -226,4 +225,3 @@ ulong QextSerialBase::lastError() const
 {
     return lastErr;
 }
-#endif

@@ -17,7 +17,6 @@ select POSIX behavior under NT, 2000, or XP ONLY by defining _TTY_POSIX_ in the 
 make no guarantees as to the quality of POSIX support under NT/2000 however.
 
 */
-#if _WIN32
 #include <stdio.h>
 #include "qextserialport.h"
 
@@ -103,4 +102,3 @@ Standard destructor.
 */
 QextSerialPort::~QextSerialPort()
 {}
-#endif

@@ -8,6 +8,16 @@ INCLUDEPATH += H:/opencv/build/include \
 LIBS    += -LH:/opencv/build/x86/vc9/lib -lopencv_core245  -lopencv_highgui245 -lopencv_imgproc245 -lopencv_ml245 \
            -LH:/work/github/Demo/lib -ltoupcam -ldetect -lMVCAMSDK
 
+SOURCES += comm/driver/uart/win/qextserialbase.cpp \
+    comm/driver/uart/win/qextserialenumerator.cpp \
+    comm/driver/uart/win/qextserialport.cpp \
+    comm/driver/uart/win/win_qextserialport.cpp
+HEADERS += \
+    comm/driver/include/qextserialbase.h \
+    comm/driver/include/qextserialenumerator.h \
+    comm/driver/include/qextserialport.h \
+    comm/driver/include/win_qextserialport.h \
+
 
 }
 
@@ -58,11 +68,8 @@ SOURCES += \
     comm/driver/uart/uarttransferopr.cpp \
     comm/driver/uart/linux/uart.cpp \
     video/render/simplerenderopr.cpp \
-    util/crc/crcopr.cpp \
-    comm/driver/uart/win/qextserialbase.cpp \
-    comm/driver/uart/win/qextserialenumerator.cpp \
-    comm/driver/uart/win/qextserialport.cpp \
-    comm/driver/uart/win/win_qextserialport.cpp
+    util/crc/crcopr.cpp
+
 
 HEADERS += \
     color.h \
@@ -105,10 +112,6 @@ HEADERS += \
     util/crc/crcopr.h \
     util/include/crcopr.h \
     video/include/CameraStatus.h \
-    comm/driver/include/qextserialbase.h \
-    comm/driver/include/qextserialenumerator.h \
-    comm/driver/include/qextserialport.h \
-    comm/driver/include/win_qextserialport.h \
     video/include/v4l2captureopr.h
 
 

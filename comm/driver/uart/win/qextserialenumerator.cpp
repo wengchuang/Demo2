@@ -3,7 +3,6 @@
  * @author Michał Policht
  * @see QextSerialEnumerator
  */
-#if _WIN32
 #include "qextserialenumerator.h"
 #include <objbase.h>
 #include <initguid.h>
@@ -153,4 +152,3 @@ QList<QextPortInfo> QextSerialEnumerator::getPorts()
 	
 	return ports;
 }
-#endif

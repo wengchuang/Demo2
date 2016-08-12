@@ -2,7 +2,10 @@
 #define _WIN_QEXTSERIALPORT_H_
 
 #include "qextserialbase.h"
+
 #include <windows.h>
+
+
 #include <QThread>
 
 
@@ -45,6 +48,8 @@ class Win_QextSerialPort: public QextSerialBase
 		void init();
 		
 	protected:
+
+
 	    HANDLE Win_Handle;
 		HANDLE threadStartEvent;
 		HANDLE threadTerminateEvent;
@@ -52,6 +57,8 @@ class Win_QextSerialPort: public QextSerialBase
 	    OVERLAPPED overlapWrite;
 		COMMCONFIG Win_CommConfig;
 		COMMTIMEOUTS Win_CommTimeouts;
+
+
 		QReadWriteLock * bytesToWriteLock;	///< @todo maybe move to QextSerialBase.
 		qint64 _bytesToWrite;		///< @todo maybe move to QextSerialBase (and implement in POSIX).
 		Win_QextSerialThread * overlapThread; ///< @todo maybe move to QextSerialBase (and implement in POSIX).
