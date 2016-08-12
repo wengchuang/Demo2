@@ -1,7 +1,6 @@
 
 #ifndef _QEXTSERIALPORT_H_
 #define _QEXTSERIALPORT_H_
-#if defined(Q_OS_WIN32)
 /*POSIX CODE*/
 #ifdef _TTY_POSIX_
 #include "posix_qextserialport.h"
@@ -29,5 +28,4 @@ class QextSerialPort: public QextBaseType
 	    virtual ~QextSerialPort();
 
 };
-#endif
 #endif

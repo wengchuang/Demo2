@@ -1,6 +1,5 @@
 #ifndef _QEXTSERIALBASE_H_
 #define _QEXTSERIALBASE_H_
-#if defined(Q_OS_WIN32)
 #include <QIODevice>
 #include <QFile>
 #include <QThread>
@@ -254,5 +253,4 @@ class QextSerialBase : public QIODevice
 		 */
 		void dsrChanged(bool status);
 };
-#endif
 #endif

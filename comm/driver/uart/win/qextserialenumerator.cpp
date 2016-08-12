@@ -3,9 +3,8 @@
  * @author Michał Policht
  * @see QextSerialEnumerator
  */
- 
+#if _WIN32
 #include "qextserialenumerator.h"
-#if defined(Q_OS_WIN32)
 #include <objbase.h>
 #include <initguid.h>
 

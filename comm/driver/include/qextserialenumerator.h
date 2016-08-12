@@ -6,8 +6,6 @@
  
 #ifndef _QEXTSERIALENUMERATOR_H_
 #define _QEXTSERIALENUMERATOR_H_
-#if defined(Q_OS_WIN32)
-
 #include <QString>
 #include <QList>
 
@@ -71,5 +69,4 @@ class QextSerialEnumerator
 		 */
 		static QList<QextPortInfo> getPorts();
 };
-#endif
 #endif /*_QEXTSERIALENUMERATOR_H_*/

@@ -2,7 +2,7 @@
 //#include <Process.h>
 //#include <QCoreApplication>
 //#include <QEvent>
-#if defined(Q_OS_WIN32)
+#if _WIN32
 #include <QReadWriteLock>
 #include "win_qextserialport.h"
 

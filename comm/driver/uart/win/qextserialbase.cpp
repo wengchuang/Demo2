@@ -1,6 +1,6 @@
+#if _WIN32
 #include "qextserialbase.h"
 
-#if defined(Q_OS_WIN32)
 
 /*!
 \fn QextSerialBase::QextSerialBase()
