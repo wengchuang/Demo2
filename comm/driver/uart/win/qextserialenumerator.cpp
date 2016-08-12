@@ -5,7 +5,7 @@
  */
  
 #include "qextserialenumerator.h"
-
+#if defined(Q_OS_WIN32)
 #include <objbase.h>
 #include <initguid.h>
 
@@ -154,3 +154,4 @@ QList<QextPortInfo> QextSerialEnumerator::getPorts()
 	
 	return ports;
 }
+#endif

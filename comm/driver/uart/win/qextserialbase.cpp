@@ -1,5 +1,7 @@
 #include "qextserialbase.h"
 
+#if defined(Q_OS_WIN32)
+
 /*!
 \fn QextSerialBase::QextSerialBase()
 Default constructor.
@@ -224,3 +226,4 @@ ulong QextSerialBase::lastError() const
 {
     return lastErr;
 }
+#endif

@@ -1,4 +1,4 @@
-
+#if defined(Q_OS_WIN32)
 /*!
 \class QextSerialPort
 \author Stefan Sander
@@ -104,3 +104,4 @@ Standard destructor.
 */
 QextSerialPort::~QextSerialPort()
 {}
+#endif

@@ -1,6 +1,6 @@
 #ifndef _WIN_QEXTSERIALPORT_H_
 #define _WIN_QEXTSERIALPORT_H_
-
+#if defined(Q_OS_WIN32)
 #include "qextserialbase.h"
 #include <windows.h>
 #include <QThread>
@@ -133,5 +133,5 @@ class Win_QextSerialThread: public QThread
 		virtual void run();
 	
 };
-
+#endif
 #endif
