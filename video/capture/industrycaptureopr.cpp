@@ -311,7 +311,6 @@ bool IndustryCaptureOpr::grabFrame()
 }
 void IndustryCaptureOpr::trigger2()
 {
-    bool ret = false;
     if(isOpened()){
 
         if(!ispause){

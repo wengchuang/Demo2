@@ -69,20 +69,24 @@ bool VideoManager::saveCameraCfgToFile(const T_SaveItem& tSaveItem,const T_Camer
 }
 VideoManager::~VideoManager()
 {
+
+    delete curCap;
+
     while(captureOprList.count()){
         delete captureOprList.takeFirst();
     }
-    delete curCap;
+
+    delete curRender;
 
     while(rendersOprList.count()){
         delete rendersOprList.takeFirst();
     }
-    delete curRender;
 
+    delete curProcesser;
     while(algosList.count()){
         delete algosList.takeFirst();
     }
-    delete curProcesser;
+
     delete DataManager::getInstance();
 }
 

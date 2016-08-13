@@ -38,6 +38,7 @@ private:
     void initBase();
 private:
     QThread                 thr;
+    bool                    bStop;
 public:
     ICaptureOpr*            capOpr;
 

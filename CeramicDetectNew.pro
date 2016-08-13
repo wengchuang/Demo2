@@ -34,6 +34,7 @@ INCLUDEPATH += ./include \
                 app \
                 util/include \
                 comm/service/include \
+                handle/Interface/include
 
 
 OTHER_FILES +=
@@ -68,7 +69,9 @@ SOURCES += \
     comm/driver/uart/uarttransferopr.cpp \
     comm/driver/uart/linux/uart.cpp \
     video/render/simplerenderopr.cpp \
-    util/crc/crcopr.cpp
+    util/crc/crcopr.cpp \
+    handle/handlermanager.cpp \
+    handle/demohandler.cpp
 
 
 HEADERS += \
@@ -112,6 +115,10 @@ HEADERS += \
     util/crc/crcopr.h \
     util/include/crcopr.h \
     video/include/CameraStatus.h \
-    video/include/v4l2captureopr.h
+    video/include/v4l2captureopr.h \
+    handle/Interface/include/IHandler.h \
+    handle/handlermanager.h \
+    handle/demohandler.h \
+    include/algargs.h
 
 

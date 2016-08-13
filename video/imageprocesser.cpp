@@ -1,12 +1,13 @@
 #include "imageprocesser.h"
 #include "datamanager.h"
 #include "debugredirect.h"
+#include "handle/handlermanager.h"
 
 ImageProcesser::ImageProcesser(QObject *parent) :
     QObject(parent)
 {
       isSnap = false;
-      isBusy = false;
+      isBusy = true;
       algoItem = NULL;
       isAlgoInit = false;
 }
@@ -55,51 +56,62 @@ void ImageProcesser::recordResault(DataItem* item)
 
 void ImageProcesser::processImage()
 {
-    isBusy = true;
     DataItem* item;
+    HandleMsg msg;
+    msg.type = IHandler::HANDLE_AFTERPROCESSIMAGE;
+    msg.handlerId = 0;
 
-    if(this->thread() != &thr){
-        this->moveToThread(&thr);
-        if(!thr.isRunning()){
-            thr.start();
+
+    if(isBusy){
+
+        if(this->thread() != &thr){
+            this->moveToThread(&thr);
+            if(!thr.isRunning()){
+                thr.start();
+            }
         }
-    }
-    if(!isAlgoInit){
-       if(!algoInit()){
-           qDebug()<<"algo init failed !!! return ...";
+        if(!isAlgoInit){
+           if(!algoInit()){
+               qDebug()<<"algo init failed !!! return ...";
 
-       }
-    }
-
-    //do{
-        item = DataManager::getInstance()->getMattedDataItem();
-        if(item){
-            if(isSnap){
-                saveSanptoFile(item);
-            }
-            memcpy(item->orgData.data()+item->offset,item->data.data()+item->offset,item->data.size()-item->offset);
-            if(isAlgoInit){
-                 algoItem->algoExec(item);
-            }
-            if(item->reverseRGB){
-                cvtColor(item->mat,item->mat,CV_BGR2RGB);
-            }
-            recordResault(item);
-            DataManager::getInstance()->putMattedDataItem(item);
-
-            emit processImageOver();
+           }
         }
+
+        //do{
+            item = DataManager::getInstance()->getMattedDataItem();
+            if(item){
+                if(isSnap){
+                    saveSanptoFile(item);
+                }
+                memcpy(item->orgData.data()+item->offset,item->data.data()+item->offset,item->data.size()-item->offset);
+                if(isAlgoInit){
+                     algoItem->algoExec(item);
+                }
+                if(item->reverseRGB){
+                    cvtColor(item->mat,item->mat,CV_BGR2RGB);
+                }
+                recordResault(item);
+
+                item->attachData.recordItem.idention = 0xa;
+                item->attachData.recordItem.status = 0xa050;
+
+                msg.context =(void*) (&(item->attachData));
+                msg.contextLen = sizeof(item->attachData);
+                HandlerManager::getInstance()->constructHandleMsg(msg);
+
+                DataManager::getInstance()->putMattedDataItem(item);
+
+                emit processImageOver();
+            }
+    }
     //}while(item);
-    isBusy = false;
 }
 
 ImageProcesser::~ImageProcesser()
 {
-    while(isBusy);
+    isBusy = false;
+    thr.quit();
     qDebug()<<"111111111111111";
-    if(thr.isRunning()){
-        thr.quit();
-    }
-    thr.wait();
+    while(thr.isRunning());
     INFO_DEBUG("~ImageProcesser...");
 }

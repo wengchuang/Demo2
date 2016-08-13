@@ -30,6 +30,7 @@ void VideoCapture::initBase()
     mheader.biBitCount = 24;
     mheader.biWidth = 0;
     mheader.biHeight = 0;
+    bStop = false;
 
     //connect(this,SIGNAL(imageComming()),this,SLOT(putImage()));
 
@@ -55,52 +56,59 @@ void  VideoCapture::trigger()
    if(!capOpr){
        return ;
    }
-
-   if(this->thread() != &thr){
-       this->moveToThread(&thr);
-       if(!thr.isRunning()){
-           thr.start();
+   if(!bStop){
+       if(this->thread() != &thr){
+           this->moveToThread(&thr);
+           if(!thr.isRunning()){
+               thr.start();
+           }
        }
+       capOpr->trigger2();
+   }else{
+       thr.quit();
    }
-   capOpr->trigger2();
 
 
 }
 void VideoCapture::putImage()
 {
-    capOpr->chanageReslution();
-    if((mheader.biWidth != capOpr->iWidth) || (mheader.biHeight != capOpr->iHeight)){
-        if((capOpr->iWidth != -1) && (capOpr->iHeight != -1)){
-            qDebug()<<"init item ...";
+    if(!bStop){
+        capOpr->chanageReslution();
+        if((mheader.biWidth != capOpr->iWidth) || (mheader.biHeight != capOpr->iHeight)){
+            if((capOpr->iWidth != -1) && (capOpr->iHeight != -1)){
+                qDebug()<<"init item ...";
 
-            mheader.biWidth = capOpr->iWidth;
-            mheader.biHeight = capOpr->iHeight;
-            mheader.biSizeImage = TDIBWIDTHBYTES(mheader.biWidth * mheader.biBitCount) * mheader.biHeight;
-            capOpr->picData.resize(mheader.biSizeImage);
-            picHeader.resize(sizeof(BITMAPFILEHEADER)+sizeof(BITMAPINFOHEADER));
+                mheader.biWidth = capOpr->iWidth;
+                mheader.biHeight = capOpr->iHeight;
+                mheader.biSizeImage = TDIBWIDTHBYTES(mheader.biWidth * mheader.biBitCount) * mheader.biHeight;
+                capOpr->picData.resize(mheader.biSizeImage);
+                picHeader.resize(sizeof(BITMAPFILEHEADER)+sizeof(BITMAPINFOHEADER));
 
-            const char* tmp;
-            BITMAPFILEHEADER fheader = {0};
-            fheader.bfType = 0x4d42;
-            fheader.bfSize = picHeader.size() + capOpr->picData.size();
-            fheader.bfOffBits = picHeader.size();
-            tmp = (char*)&fheader;
-            memcpy(picHeader.data(),tmp,sizeof(fheader));
-            tmp = (const char*)&mheader;
-            memcpy(picHeader.data()+sizeof(fheader),tmp,sizeof(mheader));
-            DataManager::getInstance()->initItems(mheader,fheader);
+                const char* tmp;
+                BITMAPFILEHEADER fheader = {0};
+                fheader.bfType = 0x4d42;
+                fheader.bfSize = picHeader.size() + capOpr->picData.size();
+                fheader.bfOffBits = picHeader.size();
+                tmp = (char*)&fheader;
+                memcpy(picHeader.data(),tmp,sizeof(fheader));
+                tmp = (const char*)&mheader;
+                memcpy(picHeader.data()+sizeof(fheader),tmp,sizeof(mheader));
+                DataManager::getInstance()->initItems(mheader,fheader);
+            }
         }
-    }
-    if(capOpr->grabFrame()){
-        DataItem* item =  DataManager::getInstance()->getPreMatDataItem();
-        if(item){
-             memcpy(item->data.data()+item->offset, capOpr->picData.data(), capOpr->picData.size());
-             item->reverseRGB = capOpr->reverseRGB;
-             DataManager::getInstance()->putPreMatDataItem(item);
-             emit capOneFrame();
+        if(capOpr->grabFrame()){
+            DataItem* item =  DataManager::getInstance()->getPreMatDataItem();
+            if(item){
+                 memcpy(item->data.data()+item->offset, capOpr->picData.data(), capOpr->picData.size());
+                 item->reverseRGB = capOpr->reverseRGB;
+                 DataManager::getInstance()->putPreMatDataItem(item);
+                 emit capOneFrame();
+            }
+        }else{
+            trigger();
         }
     }else{
-        trigger();
+        thr.quit();
     }
 }
 void  VideoCapture::installVideoRender(VideoRender*render)
@@ -169,16 +177,19 @@ void  VideoCapture::installImageProcesser(ImageProcesser* algprocesser)
 
 VideoCapture::~VideoCapture()
 {
+
     if(processer){
         disconnect(this,SIGNAL(capOneFrame()),processer,SLOT(processImage()));
         if(videoRender){
             disconnect(processer,SIGNAL(processImageOver()),videoRender,SLOT(flushImage()));
         }
     }
+
     if(thr.isRunning()){
         thr.quit();
+        bStop = true;
+        while(thr.isRunning());
     }
-    thr.wait();
 
     qDebug("~VideoCapture");
 }
