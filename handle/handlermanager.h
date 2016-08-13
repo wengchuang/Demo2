@@ -47,7 +47,7 @@ private:
     QWaitCondition      waitCon;
     QQueue<HandleMsg*>  itemQueue;
     QQueue<HandleMsg*>  emptyItemQueue;
-    QMap<IHandler::IHandlerType, QList<IHandler*>> handlerMap;
+    QMap<IHandler::IHandlerType, QList<IHandler*> > handlerMap;
     bool  unInit;
     HandleMsg* items;
 

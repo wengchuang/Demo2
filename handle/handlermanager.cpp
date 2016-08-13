@@ -112,7 +112,7 @@ HandlerManager::~HandlerManager()
     IHandler* handler;
     this->handlerManagerUninit();
     while(HandlerManager::getInstance()->isRunning());
-    QList<QList<IHandler*>> handlerlist = handlerMap.values();
+    QList< QList<IHandler*> > handlerlist = handlerMap.values();
     foreach (handlers, handlerlist) {
         while(handlers.count()){
             handler = handlers.takeFirst();
