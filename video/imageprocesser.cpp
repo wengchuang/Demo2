@@ -103,15 +103,19 @@ void ImageProcesser::processImage()
 
                 emit processImageOver();
             }
+    }else{
+        if(thr.isRunning()){
+            thr.quit();
+        }
     }
-    //}while(item);
 }
 
 ImageProcesser::~ImageProcesser()
 {
     isBusy = false;
-    thr.quit();
-    qDebug()<<"111111111111111";
+    if(thr.isRunning()){
+        thr.quit();
+    }
     while(thr.isRunning());
     INFO_DEBUG("~ImageProcesser...");
 }

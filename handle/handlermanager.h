@@ -17,7 +17,7 @@ struct HandleMsg{
 };
 
 #define MAXHANLEMSGCNT       20
-#define MAXCONTEXLEN         50
+#define MAXCONTEXLEN         1024
 
 
 
@@ -29,9 +29,9 @@ public:
     static HandlerManager* getInstance();
     bool  handlerManagerInit();
     bool  registerHandler( IHandler* handler);
-    bool  isStopRun();
     bool  constructHandleMsg(const HandleMsg& msg);
     bool  handlerManagerUninit();
+    ~HandlerManager();
 
 protected:
     void run();
@@ -49,7 +49,6 @@ private:
     QQueue<HandleMsg*>  emptyItemQueue;
     QMap<IHandler::IHandlerType, QList<IHandler*>> handlerMap;
     bool  unInit;
-    bool  bRun;
     HandleMsg* items;
 
 };

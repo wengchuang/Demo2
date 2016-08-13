@@ -1,5 +1,6 @@
 #include "handlermanager.h"
 #include "demohandler.h"
+#include "demohandler2.h"
 #include <QDebug>
 
 HandlerManager* HandlerManager::instance = NULL;
@@ -16,14 +17,11 @@ HandlerManager* HandlerManager::getInstance()
 HandlerManager::HandlerManager(QObject *parent) :
     QThread(parent)
 {
-    bRun = true;
     unInit = false;
     mutex.lock();
     this->start();
 }
-bool HandlerManager::isStopRun(){
-    return !bRun;
-}
+
 bool  HandlerManager::handlerManagerInit()
 {
     items = new HandleMsg[MAXHANLEMSGCNT];
@@ -37,6 +35,8 @@ bool HandlerManager::constructHandlers()
 {
     IHandler* tmpHandler = new DemoHandler;
     registerHandler(tmpHandler);
+    tmpHandler = new DemoHandler2;
+    registerHandler(tmpHandler);
     return true;
 }
 bool HandlerManager::registerHandler( IHandler* handler)
@@ -46,9 +46,11 @@ bool HandlerManager::registerHandler( IHandler* handler)
     if((handler->getHandleType() > IHandler::HANDLE_MIN) && (handler->getHandleType() < IHandler::HANDLE_MAX)){
         tmpList=handlerMap.value(handler->getHandleType());
         tmpList.append(handler);
-        if(tmpList.count() == 1){
-            handlerMap.insert(handler->getHandleType(),tmpList);
-        }
+        qDebug()<<"tmpList.count():"<<tmpList.count();
+
+         handlerMap.insert(handler->getHandleType(),tmpList);
+
+
         ret = handler->handlerInit();
     }
     return ret;
@@ -101,8 +103,15 @@ void  HandlerManager::run()
       }
     }
 
-qDebug("quit 1111111111111111111111");
-#if 1
+    this->quit();
+}
+
+HandlerManager::~HandlerManager()
+{
+    QList<IHandler*> handlers;
+    IHandler* handler;
+    this->handlerManagerUninit();
+    while(HandlerManager::getInstance()->isRunning());
     QList<QList<IHandler*>> handlerlist = handlerMap.values();
     foreach (handlers, handlerlist) {
         while(handlers.count()){
@@ -113,9 +122,6 @@ qDebug("quit 1111111111111111111111");
         }
 
     }
- #endif
-    qDebug("quit 22222222222222222222222");
     delete [] items;
-    qDebug("quit 4444444444444444444444");
-    bRun = false;
+
 }

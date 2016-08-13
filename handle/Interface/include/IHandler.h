@@ -9,6 +9,7 @@ public:
         HANDLE_MIN,
         HANDLE_BRFOREPROCESSIMAGE,
         HANDLE_AFTERPROCESSIMAGE,
+        HANDLE_EVERYWHERE,
         HANDLE_MAX
     };
     IHandler( const IHandlerType& type,const int& id):handlerType(type),handlerId(id){}

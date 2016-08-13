@@ -71,7 +71,9 @@ SOURCES += \
     video/render/simplerenderopr.cpp \
     util/crc/crcopr.cpp \
     handle/handlermanager.cpp \
-    handle/demohandler.cpp
+    handle/demohandler.cpp \
+    handle/demohandler2.cpp \
+    systemsource.cpp
 
 
 HEADERS += \
@@ -119,6 +121,9 @@ HEADERS += \
     handle/Interface/include/IHandler.h \
     handle/handlermanager.h \
     handle/demohandler.h \
-    include/algargs.h
+    include/algargs.h \
+    handle/demohandler2.h \
+    util/Interface/include/ifmtconverter.h \
+    systemsource.h
 
 

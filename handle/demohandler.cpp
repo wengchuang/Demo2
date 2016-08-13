@@ -9,11 +9,13 @@ DemoHandler::DemoHandler(const IHandlerType& type,const int& id):IHandler(type,i
 }
 bool DemoHandler::handlerExec(void* buf,const int& length)
 {
-    T_AttachData data;
-    memcpy(&data,buf,length);
+    T_AttachData* pDdata = (T_AttachData*)buf;
+
     qDebug("data:");
-    qDebug("idention: 0x%02x",data.recordItem.idention);
-    qDebug("status: 0x%02x",data.recordItem.status);
+    qDebug("idention: 0x%02x",pDdata->recordItem.idention);
+    qDebug("status: 0x%02x",pDdata->recordItem.status);
+    pDdata->recordItem.idention += 0x10;
+    pDdata->recordItem.status  += 0x3045;
     return true;
 }
 

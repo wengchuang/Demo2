@@ -2,7 +2,6 @@
 #include "videomanager.h"
 #include "debugredirect.h"
 #include "appconfig.h"
-#include "handle/handlermanager.h"
 #include <QDebug>
 
 
@@ -45,7 +44,8 @@ MainWindown::MainWindown(QWidget *parent) :
 
 
     process = new QProcess(this);
-    HandlerManager::getInstance()->handlerManagerInit();
+
+
 
 
 }
@@ -257,9 +257,5 @@ QLayout* MainWindown::createLayout()
 MainWindown::~MainWindown()
 {
 
-    delete VideoManager::getInstance();
-     HandlerManager::getInstance()->handlerManagerUninit();
-     while(! HandlerManager::getInstance()->isStopRun());
-     delete HandlerManager::getInstance();
 
 }

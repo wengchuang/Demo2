@@ -1,12 +1,11 @@
 #include <QApplication>
 #include <QTextCodec>
-#include "videomanager.h"
+#include "systemsource.h"
 #include "mainwindown.h"
-
-
 
 int main(int argc,char*argv[])
 {
+    int ret;
     QApplication app(argc,argv);
 
     QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
@@ -19,13 +18,20 @@ int main(int argc,char*argv[])
         QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
     #endif
 
-    if(VideoManager::getInstance()->managerInit() != 0){
-        qDebug("VideoManager init failed!");
+    if(!SystemSource::getInstance()->sourceInit()){
+        qDebug("SystemSource init failed!");
         return -1;
     }
 
 
     MainWindown win;
     win.show();
-    return app.exec();
+
+    ret = app.exec();
+
+    delete  SystemSource::getInstance();
+
+    return ret;
+
+
 }
