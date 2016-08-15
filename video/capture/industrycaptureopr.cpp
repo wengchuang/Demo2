@@ -327,7 +327,12 @@ void IndustryCaptureOpr::trigger2()
 }
 IndustryCaptureOpr::~IndustryCaptureOpr()
 {
-    closeCapture();
+    if(g_hCamera != -1){
+        CameraUnInit(g_hCamera);
+        clearCameraCability(tCapbility);
+        g_hCamera=-1;
+        bCloseCapture = false;
+    }
     qDebug("~IndustryCaptureOpr ... ");
 }
 

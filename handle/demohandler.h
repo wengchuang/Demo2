@@ -8,7 +8,7 @@ public:
     bool handlerInit(){ return true;}
     bool handlerUninit() {return true;}
     bool handlerExec(void* buf,const int& length);
-    DemoHandler(const IHandlerType& type = IHandler::HANDLE_AFTERPROCESSIMAGE,const int& id = 0);
+    DemoHandler(QString name);
 };
 
 #endif // DEMOHANDLER_H

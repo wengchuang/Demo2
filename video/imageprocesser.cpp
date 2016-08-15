@@ -58,7 +58,7 @@ void ImageProcesser::processImage()
 {
     DataItem* item;
     HandleMsg msg;
-    msg.type = IHandler::HANDLE_AFTERPROCESSIMAGE;
+    msg.type = IHandler::HANDLE_ALGORET;
     msg.handlerId = 0;
 
 
@@ -85,19 +85,15 @@ void ImageProcesser::processImage()
                 }
                 memcpy(item->orgData.data()+item->offset,item->data.data()+item->offset,item->data.size()-item->offset);
                 if(isAlgoInit){
-                     algoItem->algoExec(item);
+                     algoItem->algoExec(item->mat);
                 }
                 if(item->reverseRGB){
                     cvtColor(item->mat,item->mat,CV_BGR2RGB);
                 }
                 recordResault(item);
 
-                item->attachData.recordItem.idention = 0xa;
-                item->attachData.recordItem.status = 0xa050;
 
-                msg.context =(void*) (&(item->attachData));
-                msg.contextLen = sizeof(item->attachData);
-                HandlerManager::getInstance()->constructHandleMsg(msg);
+                HandlerManager::getInstance()->constructHandleMsg(msg,algoItem);
 
                 DataManager::getInstance()->putMattedDataItem(item);
 

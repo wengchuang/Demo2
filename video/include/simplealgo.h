@@ -7,7 +7,7 @@ class SimpleAlgo : public IAlgorithm
 public:
    explicit SimpleAlgo(const QString& name,QObject *parent = 0);
    virtual ~SimpleAlgo();
-    int algoExec(DataItem* item);
+    int algoExec(Mat& mat,void* args = NULL);
 };
 
 #endif // SIMPLEALGO_H

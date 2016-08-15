@@ -5,6 +5,7 @@
 #include <QThread>
 #include <opencv/cv.h>
 #include "ialgorithm.h"
+#include "algargs.h"
 using namespace cv;
 
 class ImageProcesser : public QObject

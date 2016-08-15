@@ -8,10 +8,12 @@ bool  CeramicDetectAlgo::_algoInit()
     return (m_tileDetectObj.Inintial("../lib/tileDetect.xml")==0)?false:true;
 }
 
-int CeramicDetectAlgo::algoExec(DataItem* item)
+int CeramicDetectAlgo::algoExec(Mat& mat , void* args)
 {
-    item->attachData.recordItem.idention = m_tileDetectObj.TileDetect(item->mat);
-    return item->attachData.recordItem.idention;
+    Q_UNUSED(args);
+    //item->attachData.recordItem.idention = m_tileDetectObj.TileDetect(item->mat);
+     //m_tileDetectObj.TileDetect(mat);
+    return m_tileDetectObj.TileDetect(mat);;
 }
 
 CeramicDetectAlgo::~CeramicDetectAlgo()

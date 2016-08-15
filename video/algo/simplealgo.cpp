@@ -3,9 +3,10 @@
 SimpleAlgo::SimpleAlgo(const QString& name,QObject *parent) : IAlgorithm(name,parent)
 {
 }
-int SimpleAlgo::algoExec(DataItem* item)
+int SimpleAlgo::algoExec( Mat& mat,void* args)
 {
-     circle(item->mat, Point(100,100), 30, Scalar( 255, 0, 0 ),0);
+    Q_UNUSED(args);
+     circle(mat, Point(100,100), 30, Scalar( 255, 0, 0 ),0);
      return 0;
 }
 SimpleAlgo::~SimpleAlgo()

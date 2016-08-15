@@ -10,7 +10,7 @@ public:
 
 
     bool handlerExec(void* buf,const int& length);
-    DemoHandler2(const IHandlerType& type = IHandler::HANDLE_AFTERPROCESSIMAGE,const int& id = 0);
+    DemoHandler2(QString name);
 };
 
 #endif // DEMOHANDLER2_H

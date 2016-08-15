@@ -10,7 +10,7 @@ public:
     explicit CeramicDetectAlgo(const QString& name,QObject *parent = 0);
     virtual ~CeramicDetectAlgo();
     bool   _algoInit();
-    int algoExec(DataItem* item);
+    int algoExec(Mat& mat , void* args = NULL);
 private:
     Detect               m_tileDetectObj;
 

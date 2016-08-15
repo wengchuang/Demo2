@@ -124,6 +124,6 @@ HEADERS += \
     include/algargs.h \
     handle/demohandler2.h \
     util/Interface/include/ifmtconverter.h \
-    systemsource.h
+    include/systemsource.h
 
 
