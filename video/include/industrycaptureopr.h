@@ -19,15 +19,17 @@ public:
     bool isOpened() ;
     void closeCapture();
     void getCameraCapbility(PT_CameraCapbility pCapbility);
+    void setCameraMode(Camera::CameraMode mode);
+
 
     bool setCameraArgs(Camera::CameraArgs argId,const QVariant& variant);
     bool getCameraArgs(Camera::CameraArgs argId,QVariant&value);
-    bool snapPic();
+    bool snapPic(const QString& filePath);
     virtual ~IndustryCaptureOpr();
 
 protected:
-    virtual bool    grabFrame();
-    virtual void    trigger2();
+    bool    grabFrame();
+    void    trigger2();
     void   chanageReslution();
 private:
     tSdkCameraDevInfo       tCameraEnumList[4];

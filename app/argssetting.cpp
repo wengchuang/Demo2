@@ -7,10 +7,11 @@
 #include <QComboBox>
 #include <QFileDialog>
 #include <QLineEdit>
+#include "deviceoprmanager.h"
+#include "uarttransferopr.h"
 #include "cameraparameterdef.h"
 
 #include "debugredirect.h"
-#include "appconfig.h"
 
 #define  EXPORESUE      "exporesue"
 #define  GAIN           "gain"
@@ -627,6 +628,9 @@ QWidget* ArgsSetting::createAutoWidget()
     pathEdit->setFixedSize(200,40);
     pathEdit->setEnabled(false);
     hLay->addWidget(pathEdit);
+    QString snappath;
+    Appconfig::getInstance()->getSnapPath(snappath);
+    pathEdit->setText(snappath);
 
     pathBtn = new QPushButton(QString::fromLocal8Bit("设置"));
     connect(pathBtn,SIGNAL(clicked()),this,SLOT(btnClicked()));
@@ -685,7 +689,15 @@ void ArgsSetting::comBoxIndexChanaged(int index)
 {
     QComboBox* tmpBox = (QComboBox*)sender();
     if(tmpBox == resBox){
-            VideoManager::getInstance()->setCameraArgs(Camera::RESOLUTION,index);
+       VideoManager::getInstance()->setCameraArgs(Camera::RESOLUTION,index);
+    }else if(tmpBox == portNameComBox){
+
+#if defined(Q_OS_LINUX)
+   UartTransferOpr* opr = (UartTransferOpr*)  DeviceOprManager::getInstance()->getTransferOprByName("Linux Uart");
+#elif defined(Q_OS_WIN32)
+    UartTransferOpr* opr = (UartTransferOpr*) DeviceOprManager::getInstance()->getTransferOprByName("Windows Uart");
+#endif
+       opr->setPortName(portNameComBox->currentText());
     }
 }
 
@@ -699,6 +711,7 @@ void ArgsSetting::radioBtnClicked()
             tmpLay->addWidget(autoWidget);
             curWidget = autoWidget;
             curWidget->show();
+            VideoManager::getInstance()->setCameraMode(Camera::MODE_AUTO);
 
         }
     }else{
@@ -708,6 +721,7 @@ void ArgsSetting::radioBtnClicked()
             tmpLay->addWidget(externTriggerWidget);
             curWidget = externTriggerWidget;
             curWidget->show();
+            VideoManager::getInstance()->setCameraMode(Camera::MODE_EXTERN);
 
         }
 
@@ -721,7 +735,7 @@ QLayout* ArgsSetting::createOutTimeLayout()
     QVBoxLayout* inVLay = new QVBoxLayout;
     inVLay->addSpacing(20);
     QHBoxLayout* inHLay = new QHBoxLayout;
-    //inHLay->setAlignment(Qt::AlignCenter);
+
     QLabel* lab = new QLabel(QString::fromLocal8Bit("IO输出超时："));
     lab->setFixedWidth(100);
     QSpinBox* sbBox = new QSpinBox;
@@ -729,7 +743,6 @@ QLayout* ArgsSetting::createOutTimeLayout()
     sbBox->setRange(30,500);
     sbBox->setSuffix("ms");
     sbBox->setFixedWidth(60);
-    //sbBox->setEnabled(false);
 
     inHLay->addWidget(lab);
     inHLay->addWidget(sbBox);
@@ -748,8 +761,228 @@ QLayout* ArgsSetting::createOutTimeLayout()
     mainLay->addWidget(gbbox);
     return mainLay;
 }
+QLayout* ArgsSetting::createRedLineCfgLayout(const LineCfg& lineCfg)
+{
+    int cnt,i;
+    QVBoxLayout* mainLay = new QVBoxLayout;
+    mainLay->addSpacing(10);
+    QGroupBox*gbbox = new QGroupBox(QString::fromLocal8Bit("红线配置"));
+    QHBoxLayout* hLay = new QHBoxLayout;
+
+    QLabel* lab = new QLabel(QString::fromLocal8Bit("红线条数"));
+    lab->setFixedWidth(100);
+    QComboBox * comBox = new QComboBox;
+    comBox->setObjectName("redLineCnt");
+    QStringList comList;
+    comList<<QString::fromLocal8Bit("1 条")<<QString::fromLocal8Bit("2 条")<<QString::fromLocal8Bit("3 条")
+          <<QString::fromLocal8Bit("4 条")<<QString::fromLocal8Bit("5 条")
+          <<QString::fromLocal8Bit("6 条")<<QString::fromLocal8Bit("7 条")<<QString::fromLocal8Bit("8 条");
+    comBox->addItems(comList);
+    comBox->setCurrentIndex(lineCfg.redIndexs.count() - 1);
+    lineCntrlComList.append(comBox);
+
+    cnt = lineCfg.redIndexs.count();
+
+    slidBtn = new mySliderButton;
+    for(i = 0 ; i < cnt; i++){
+       slidBtn->addItem(QString::fromLocal8Bit("位置%1区域").arg(i+1));
+    }
+
+
+
+    hLay->addStretch(1);
+    hLay->addWidget(lab);
+    hLay->addWidget(comBox);
+    hLay->addStretch(1);
+    hLay->addWidget(slidBtn);
+    hLay->addStretch(1);
+    mainLay->addLayout(hLay);
+
+
+    lineCfgInVBox = new QVBoxLayout;
+    comList.clear();
+    for(i = 0; i < MAXCHANNELCNT; i++){
+        comList.append(QString::fromLocal8Bit("%1通道").arg(i+1));
+    }
+    comList.append(QString::fromLocal8Bit("NONE"));
+
+    for(i = 0; i<MAXCHANNELCNT;i++){
+        comBox = new QComboBox;
+        comBox->addItems(comList);
+        comBox->setObjectName(QString("redLineCfg%1").arg(i+1));
+        if(i < (lineCfg.redIndexs.count())){
+            qDebug()<<"lineCfg.redIndexs.at(i):"<<lineCfg.redIndexs.at(i);
+            comBox->setCurrentIndex(lineCfg.redIndexs.at(i)-1);
+        }else{
+            comBox->setCurrentIndex(MAXCHANNELCNT);
+        }
+        lineCntrlComList.append(comBox);
+        redLineCntrlComList.append(comBox);
+    }
+
+    for(i = 0 ; i < MAXCHANNELCNT; i++){
+        if(i%2 == 0){
+            hLay = new QHBoxLayout;
+            hLay->addStretch(1);
+            lineCfgLays.append(hLay);
+
+        }
+        lab = new QLabel(QString::fromLocal8Bit("位置%1区域通道号").arg(i+1));
+        lineCntrlWidgets.append(lab);
+
+        comBox = redLineCntrlComList.at(i);
+
+        hLay->addWidget(lab);
+        hLay->addWidget(comBox);
+        hLay->addStretch(1);
+        if(i%2 == 0){
+            lineCfgInVBox->addLayout(hLay);
+        }
+    }
+
+    for(i = cnt ; i < redLineCntrlComList.count() ; i++){
+
+        redLineCntrlComList.at(i)->hide();
+        lineCntrlWidgets.at(i)->hide();
+
+    }
+
+
+    gbbox->setLayout(lineCfgInVBox);
+
+
+    setGroupBoxStyle(gbbox);
+    mainLay->addWidget(gbbox);
+    return mainLay;
+
+}
+
+void ArgsSetting::contrlLineSlot(int index)
+{
+    int i,cnt;
+    QComboBox* tmpBox;
+    QComboBox* box =(QComboBox*)sender();
+    if(box->objectName() == "redLineCnt" ){
+        slidBtn->removeAll();
+        foreach (tmpBox, redLineCntrlComList) {
+            tmpBox->hide();
+        }
+        foreach(QWidget* widget, lineCntrlWidgets){
+            widget->hide();
+        }
+        cnt = index+1;
+        for(i = 0 ; i < redLineCntrlComList.count(); i++){
+           if(i<cnt){
+               slidBtn->addItem(QString::fromLocal8Bit("位置%1区域").arg(i+1));
+               redLineCntrlComList.at(i)->show();
+               lineCntrlWidgets.at(i)->show();
+           }else{
+               disconnect(redLineCntrlComList.at(i),SIGNAL(currentIndexChanged(int)),this,SLOT(contrlLineSlot(int)));
+               redLineCntrlComList.at(i)->setCurrentIndex(MAXCHANNELCNT);
+               connect(redLineCntrlComList.at(i),SIGNAL(currentIndexChanged(int)),this,SLOT(contrlLineSlot(int)));
+
+           }
+        }
+    }else{
+       QString str = box->currentText();
+       foreach (tmpBox, lineCntrlComList) {
+           if(str == tmpBox->currentText()){
+               if(tmpBox != box){
+                   disconnect(tmpBox,SIGNAL(currentIndexChanged(int)),this,SLOT(contrlLineSlot(int)));
+                   tmpBox->setCurrentIndex(MAXCHANNELCNT);
+                   connect(tmpBox,SIGNAL(currentIndexChanged(int)),this,SLOT(contrlLineSlot(int)));
+               }
+
+           }
+       }
+    }
+}
+
+QLayout* ArgsSetting::createOutputCfgLayout()
+{
+
+    LineCfg lineCfg;
+    QVBoxLayout* mainLay = new QVBoxLayout;
+    mainLay->addSpacing(10);
+    QGroupBox*gbbox = new QGroupBox(QString::fromLocal8Bit("输出配置"));
+
+    QVBoxLayout* vLay = new QVBoxLayout;
+    Appconfig::getInstance()->getLineCfg(lineCfg);
+    vLay->addLayout(createRedLineCfgLayout(lineCfg));
+    vLay->addLayout(createBlackLineCfgLayout(lineCfg));
+    foreach (QComboBox* box, lineCntrlComList) {
+        connect(box,SIGNAL(currentIndexChanged(int)),this,SLOT(contrlLineSlot(int)));
+    }
+
+    QHBoxLayout* hLay = new QHBoxLayout;
+    hLay->setAlignment(Qt::AlignRight);
+    QPushButton* btn = new QPushButton(QString::fromLocal8Bit("确定"));
+    setPushBtnStyle(btn);
+    hLay->addWidget(btn);
+    vLay->addLayout(hLay);
+
+    gbbox->setLayout(vLay);
+    setGroupBoxStyle(gbbox);
+    mainLay->addWidget(gbbox);
+    return mainLay;
+}
+
+QLayout* ArgsSetting::createBlackLineCfgLayout(const LineCfg& lineCfg)
+{
+    int i;
+    int value;
+    QStringList comList;
+    for(i = 0; i < MAXCHANNELCNT; i++){
+        comList.append(QString::fromLocal8Bit("%1通道").arg(i+1));
+    }
+    comList.append(QString::fromLocal8Bit("NONE"));
+
+    QVBoxLayout* mainLay = new QVBoxLayout;
+    QGroupBox*gbbox = new QGroupBox(QString::fromLocal8Bit("黑线配置"));
+
+
+    QVBoxLayout* inVLay = new QVBoxLayout;
+    inVLay->addSpacing(10);
+    QHBoxLayout* hLay;
+    QComboBox * comBox;
+    for(i = 0; i < MAXCHANNELCNT; i++){
+        if( i%2 == 0){
+            hLay = new QHBoxLayout;
+            hLay->setAlignment(Qt::AlignCenter);
+            hLay->addStretch(1);
+
+        }
+        QLabel* lab = new QLabel(QString::fromLocal8Bit("%1条黑线通道号").arg(i+1));
+        hLay->addWidget(lab);
+        hLay->addSpacing(3);
+        comBox = new QComboBox;
+        comBox->setObjectName(QString("blackLineCfg%1").arg(i+1));
+        lineCntrlComList.append(comBox);
+        comBox->addItems(comList);
+        value = lineCfg.blackmap.value(i+1,-1);
+        if(value > 0){
+          comBox->setCurrentIndex(value - 1);
+        }else{
+           comBox->setCurrentIndex(MAXCHANNELCNT);
+        }
+        hLay->addWidget(comBox);
+        hLay->addStretch(1);
+        if(i%2){
+           inVLay->addLayout(hLay);
+        }
+
+
+    }
+
+    gbbox->setLayout(inVLay);
+    setGroupBoxStyle(gbbox);
+    mainLay->addWidget(gbbox);
+    return mainLay;
+}
 QLayout*ArgsSetting::createSerialLayout()
 {
+    QString tmpStr;
+    int index=0;
     QVBoxLayout* mainLay = new QVBoxLayout;
     QGroupBox*gbbox = new QGroupBox(QString::fromLocal8Bit("串口设置"));
 
@@ -769,6 +1002,17 @@ QLayout*ArgsSetting::createSerialLayout()
     inHLay->addWidget(portNameComBox);
     inVLay->addLayout(inHLay);
 
+    QString portName;
+    Appconfig::getInstance()->getSerialPortName(portName);
+    for(index = 0;index < comList.count();index++){
+        if(comList.at(index) == portName){
+           break;
+        }
+    }
+
+    portNameComBox->setCurrentIndex(index);
+    connect(portNameComBox,SIGNAL(currentIndexChanged(int)),this,SLOT(comBoxIndexChanaged(int)));
+
 
 
 
@@ -786,6 +1030,7 @@ QLayout*ArgsSetting::createSerialLayout()
     mainLay->addWidget(gbbox);
     return mainLay;
 }
+
 QLayout*ArgsSetting::createModeSetLayout()
 {
     QVBoxLayout* mainLay = new QVBoxLayout;
@@ -795,21 +1040,32 @@ QLayout*ArgsSetting::createModeSetLayout()
     inVLay->addSpacing(20);
     QHBoxLayout* inHLay = new QHBoxLayout;
     autoRadioBtn = new QRadioButton(QString::fromLocal8Bit("自动触发模式"));
-    connect(autoRadioBtn,SIGNAL(clicked()),this,SLOT(radioBtnClicked()));
     inHLay->addWidget(autoRadioBtn);
     externRadioBtn = new QRadioButton(QString::fromLocal8Bit("外部触发模式"));
-    connect(externRadioBtn,SIGNAL(clicked()),this,SLOT(radioBtnClicked()));
     inHLay->addWidget(externRadioBtn);
     inVLay->addLayout(inHLay);
-
 
 
     tmpLay = new QVBoxLayout;
     createExternTriggerWidget();
     createAutoWidget();
 
-    autoRadioBtn->setChecked(true);
-    curWidget = autoWidget;
+    Camera::CameraMode mode;
+    if(Appconfig::getInstance()->getCameraMode(mode)){
+
+        if(mode == Camera::MODE_AUTO){
+            autoRadioBtn->setChecked(true);
+            curWidget = autoWidget;
+        }else if(mode == Camera::MODE_EXTERN){
+            qDebug("mode = Camera::MODE_EXTERN");
+            externRadioBtn->setChecked(true);
+            curWidget = externTriggerWidget;
+        }
+    }
+
+    connect(autoRadioBtn,SIGNAL(clicked()),this,SLOT(radioBtnClicked()));
+    connect(externRadioBtn,SIGNAL(clicked()),this,SLOT(radioBtnClicked()));
+
 
     tmpLay->addWidget(curWidget);
     inVLay->addLayout(tmpLay);
@@ -832,8 +1088,13 @@ void ArgsSetting::createWidgets()
     IOArgsWidget = new QWidget();
     vLay = new QVBoxLayout;
     vLay->setAlignment(Qt::AlignCenter);
+
+    vLay->addLayout(createOutputCfgLayout());
+
+
     vLay->addLayout(createSerialLayout());
     vLay->addLayout(createOutTimeLayout());
+
     IOArgsWidget->setLayout(vLay);
 
 }
@@ -845,6 +1106,11 @@ void ArgsSetting::btnClicked()
     if(btn == snapBtn){
         VideoManager::getInstance()->snapPic();
     }else if(btn == pathBtn){
+       QString path = QFileDialog::getExistingDirectory(this,QString::fromLocal8Bit("选择路径"),"./" );
+       if(!path.isEmpty()){
+           Appconfig::getInstance()->setSnapPath(path);
+           pathEdit->setText(path);
+       }
 
     }else if(btn == IOPullBtn){
 

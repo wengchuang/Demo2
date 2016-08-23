@@ -123,8 +123,7 @@ bool IndustryCaptureOpr::openCapture(void)
 
 
         //相机是触发模式
-        CameraSetTriggerMode(g_hCamera,1);
-        CameraSetTriggerCount(g_hCamera,1);
+
         CameraSetAeState(g_hCamera,false);
 
 
@@ -146,6 +145,26 @@ bool IndustryCaptureOpr::openCapture(void)
         ret = true;
     }
     return ret;
+}
+void IndustryCaptureOpr::setCameraMode(Camera::CameraMode mode)
+{
+    int trigerMode;
+    CameraGetTriggerMode(g_hCamera,&trigerMode);
+    if(trigerMode != mode)
+    {
+        if(mode == Camera::MODE_AUTO){
+
+            CameraSetTriggerMode(g_hCamera,1);
+            CameraSetTriggerCount(g_hCamera,1);
+
+        }else if (mode == Camera::MODE_EXTERN){
+            qDebug()<<"set mode extern";
+
+            CameraSetTriggerMode(g_hCamera,2);
+            CameraSetTriggerCount(g_hCamera,1);
+
+        }
+    }
 }
 
 void IndustryCaptureOpr::getCameraCapbility(PT_CameraCapbility pCapbility)
@@ -198,13 +217,14 @@ bool IndustryCaptureOpr::setCameraArgs(Camera::CameraArgs argId,const QVariant& 
     }
     return ret;
 }
-bool IndustryCaptureOpr::snapPic()
+bool IndustryCaptureOpr::snapPic(const QString& filePath)
 {
     bool ret = false;
+    static int index = 0;
     tSdkFrameHead	tFrameHead;
     BYTE			*pbyBuffer;
     BYTE			*pbImgBuffer;
-    QString filename="./456.jpg";
+    QString filename= filePath + "/IndustryCapture"+QString::number(index++)+".jpg";
     if(CameraSnapToBuffer(g_hCamera,&tFrameHead,&pbyBuffer,1000) == CAMERA_STATUS_SUCCESS)
     {
         //CameraSnapToBuffer抓拍一张图像保存到buffer中

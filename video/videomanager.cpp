@@ -23,6 +23,7 @@
 #include "v4l2captureopr.h"
 #endif
 #include "industrycaptureopr.h"
+#include "virtualcapopr.h"
 
 
 VideoManager* VideoManager::instance = NULL;
@@ -49,6 +50,13 @@ VideoManager::VideoManager(QObject *parent) :
     defRenderName = "ScrollRenderOpr";
     tCapDesc.captureName = "NULL";
 
+}
+void VideoManager::setCameraMode(Camera::CameraMode mode)
+{
+    if((mode < Camera::MODE_MAX) && (mode > Camera::MODE_MINI) ){
+        this->curCap->setCameraMode(mode);
+        Appconfig::getInstance()->setCameraMode(mode);
+    }
 }
 
 bool VideoManager::saveCameraCfgToFile(const T_SaveItem& tSaveItem,const T_CameraCapbility& tCapbility)
@@ -246,8 +254,13 @@ bool VideoManager::getCaptureCapbility(PT_CameraCapbility pCapbility)
 }
 void VideoManager::snapPic()
 {
-    if(!(curCap->capOpr->snapPic())){
-        curProcesser->snapPic();
+    QString filePath;
+    Appconfig::getInstance()->getSnapPath(filePath);
+
+    if(curCap->capOpr->isOpened()){
+        if(!(curCap->capOpr->snapPic(filePath))){
+            curProcesser->snapPic(filePath);
+        }
     }
 }
 int  VideoManager::managerInit()
@@ -359,6 +372,7 @@ int VideoManager::constructVideoCaptureOprs()
         INFO_DEBUG(degStr.toUtf8().data());
     }
 
+
 #ifdef __linux
     captureOpr = new V4L2CaptureOpr("V4L2CaptureOpr");
     if(registerCaptureOpr(captureOpr) < 0){
@@ -382,6 +396,16 @@ int VideoManager::constructVideoCaptureOprs()
     }
 #endif
 
+    captureOpr = new VirtualCapOpr("VirtualCapOpr");
+    if(registerCaptureOpr(captureOpr) < 0){
+        degStr.sprintf("register capture:%s failed !",captureOpr->objectName().toUtf8().data());
+        INFO_DEBUG(degStr.toUtf8().data());
+    }else{
+        QString loadPath;
+        if(Appconfig::getInstance()->getVirtualCapoprDir(loadPath));
+        VirtualCapOpr* virCapOpr = (VirtualCapOpr*) captureOpr;
+        virCapOpr->setLoadPath(loadPath);
+    }
 
 
     return 0;

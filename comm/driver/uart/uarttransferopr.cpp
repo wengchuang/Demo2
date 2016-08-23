@@ -1,4 +1,5 @@
 #include "uarttransferopr.h"
+#include "appconfig.h"
 #include <QDebug>
 #if defined(Q_OS_LINUX)
 #include <fcntl.h>
@@ -9,6 +10,7 @@
 #include <unistd.h>
 
 #endif
+
 
 UartTransferOpr::UartTransferOpr()
 {
@@ -27,6 +29,7 @@ const QString& UartTransferOpr::getOprName()
 
 bool UartTransferOpr::transferInit()
 {
+    Appconfig::getInstance()->getSerialPortName(portName);
     bool ret = false;
 #if defined(Q_OS_LINUX)
     this->fd = open("/dev/ttymxc1",O_RDWR);
@@ -42,7 +45,7 @@ bool UartTransferOpr::transferInit()
     {
         delete port;
     }
-    port=new Win_QextSerialPort("com3",QextSerialBase::EventDriven);
+    port=new Win_QextSerialPort(portName,QextSerialBase::EventDriven);
     ret=this->port->open(QIODevice::ReadWrite);
     if(ret)
     {
@@ -69,11 +72,20 @@ int  UartTransferOpr::sendData(void* buf, int length)
     #elif defined(Q_OS_WIN32)
      if(port){
          ret = port->write((const char*)buf,length);
+         ret = length;
      }
     #endif
     return ret;
 
 }
+void  UartTransferOpr::setPortName(const QString& portName)
+{
+    this->transferUninit();
+    this->portName = portName;
+    Appconfig::getInstance()->setSerialPortName(portName);  
+    this->transferInit();
+}
+
 int  UartTransferOpr::readData(void* buf, int length)
 {
     int ret = -1;
@@ -101,6 +113,7 @@ int  UartTransferOpr::readData(void* buf, int length)
 bool UartTransferOpr::transferUninit()
 {
     bool ret = false;
+
  #if defined(Q_OS_LINUX)
     if(this->fd > 0){
         close(this->fd);

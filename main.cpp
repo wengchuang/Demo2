@@ -25,7 +25,7 @@ int main(int argc,char*argv[])
 
 
     MainWindown win;
-    win.show();
+    win.showMaximized();
 
     ret = app.exec();
 

@@ -3,7 +3,15 @@
 
 #include <QObject>
 #include <QSettings>
+#include <QMap>
 #include "cameraparameterdef.h"
+
+#define MAXCHANNELCNT 8
+
+typedef struct{
+    QList<int>     redIndexs;
+    QMap<int,int>  blackmap;
+}LineCfg;
 
 class Appconfig : public QObject
 {
@@ -15,6 +23,14 @@ public:
     bool              setTempColorCfg(const QString& capName,const T_CameraCapbility& tCapbility);
     bool              setAdjColorCfg(const QString& capName,const T_CameraCapbility& tCapbility);
     bool              loadSaveCfg(const QString& capName,T_CameraCapbility& tCapbility);
+    bool              getCameraMode(Camera::CameraMode& mode);
+    bool              setCameraMode(Camera::CameraMode& mode);
+    bool              setSnapPath(const QString& path);
+    bool              getSnapPath(QString& path);
+    bool              getSerialPortName(QString& portName);
+    bool              setSerialPortName(const QString& portName);
+    bool              getLineCfg(LineCfg& cfg);
+    bool              getVirtualCapoprDir(QString& loadPath);
 
     QStringList       videoLibsNames();
     QString           getCfgProcesser();

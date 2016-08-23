@@ -17,6 +17,7 @@ public:
     void  installVideoRender(VideoRender*render);
     void  installImageProcesser(ImageProcesser* processer);
     void  installCaptureOpr(ICaptureOpr* opr);
+    void setCameraMode(Camera::CameraMode mode);
     bool  isSupportSaveCfg(){if(this->capOpr){return this->capOpr->bSupportSaveCfg;}}
     virtual ~VideoCapture();
 
@@ -39,6 +40,7 @@ private:
 private:
     QThread                 thr;
     bool                    bStop;
+    Camera::CameraMode      curMode;
 public:
     ICaptureOpr*            capOpr;
 

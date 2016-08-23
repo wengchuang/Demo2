@@ -10,6 +10,9 @@
 #include <QMap>
 #include <QSpinBox>
 #include <QComboBox>
+#include "mysliderbutton.h"
+
+#include "appconfig.h"
 #include "videomanager.h"
 
 class ArgsSetting : public BaseDialog
@@ -30,6 +33,7 @@ private slots:
     void btnClicked();
     void radioBtnClicked();
     void comBoxIndexChanaged(int index);
+    void contrlLineSlot(int index);
 private:
     QLayout* createLayout();
     void     createWidgets();
@@ -39,11 +43,20 @@ private:
     QLayout* createOutTimeLayout();
     QLayout* createColorLayout();
     QLayout* createResoultionLayout();
+    QLayout* createRedLineCfgLayout(const LineCfg& lineCfg);
+    QLayout* createBlackLineCfgLayout(const LineCfg& lineCfg);
+    QLayout* createOutputCfgLayout();
+
+
+
     QWidget* createAutoWidget();
     QWidget* createExternTriggerWidget();
+
+
 private:
     QWidget*    cameraArgsWidget;
     QWidget*    IOArgsWidget;
+
     QWidget*    autoWidget;
     QWidget*    externTriggerWidget;
     QLineEdit*  exporesEdit;
@@ -66,6 +79,14 @@ private:
     QRadioButton* autoRadioBtn;
     QRadioButton* externRadioBtn;
     QComboBox*      resBox;
+
+
+    QList<QComboBox*> lineCntrlComList;
+    QList<QComboBox*> redLineCntrlComList;
+    QList<QWidget*>   lineCntrlWidgets;
+    QVBoxLayout*      lineCfgInVBox;
+    QList<QLayout*>   lineCfgLays;
+    mySliderButton* slidBtn;
 
     T_CameraCapbility tCapbility;
 };

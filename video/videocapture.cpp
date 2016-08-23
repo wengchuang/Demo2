@@ -1,5 +1,6 @@
 #include "videocapture.h"
 #include "datamanager.h"
+#include "appconfig.h"
 
 
 #define TDIBWIDTHBYTES(bits)	(((bits) + 31) / 32 * 4)
@@ -31,10 +32,27 @@ void VideoCapture::initBase()
     mheader.biWidth = 0;
     mheader.biHeight = 0;
     bStop = false;
+    Appconfig::getInstance()->getCameraMode(curMode);
 
     //connect(this,SIGNAL(imageComming()),this,SLOT(putImage()));
 
 }
+void VideoCapture::setCameraMode(Camera::CameraMode mode)
+{
+    if(capOpr && videoRender){
+        capOpr->setCameraMode(mode);
+        if(mode == Camera::MODE_AUTO){
+            connect(videoRender,SIGNAL(repaintOver()),this,SLOT(trigger()));
+            if(capOpr->isOpened()){
+                this->trigger();
+            }
+        }else if(mode == Camera::MODE_EXTERN){
+            disconnect(videoRender,SIGNAL(repaintOver()),this,SLOT(trigger()));
+        }
+
+    }
+}
+
 void  VideoCapture::installCaptureOpr(ICaptureOpr* opr)
 {
     if(opr){
@@ -76,8 +94,6 @@ void VideoCapture::putImage()
         capOpr->chanageReslution();
         if((mheader.biWidth != capOpr->iWidth) || (mheader.biHeight != capOpr->iHeight)){
             if((capOpr->iWidth != -1) && (capOpr->iHeight != -1)){
-                qDebug()<<"init item ...";
-
                 mheader.biWidth = capOpr->iWidth;
                 mheader.biHeight = capOpr->iHeight;
                 mheader.biSizeImage = TDIBWIDTHBYTES(mheader.biWidth * mheader.biBitCount) * mheader.biHeight;
@@ -136,7 +152,8 @@ void  VideoCapture::installVideoRender(VideoRender*render)
 
         connect(this,SIGNAL(capOneFrame()),processer,SLOT(processImage()));
         connect(processer,SIGNAL(processImageOver()),videoRender,SLOT(flushImage()));
-        connect(videoRender,SIGNAL(repaintOver()),this,SLOT(trigger()));
+        setCameraMode(curMode);
+        //connect(videoRender,SIGNAL(repaintOver()),this,SLOT(trigger()));
 
     }else{
 #ifdef _WIN32
@@ -167,7 +184,8 @@ void  VideoCapture::installImageProcesser(ImageProcesser* algprocesser)
         connect(this,SIGNAL(capOneFrame()),processer,SLOT(processImage()));
         if(videoRender){
             connect(processer,SIGNAL(processImageOver()),videoRender,SLOT(flushImage()));
-            connect(videoRender,SIGNAL(repaintOver()),this,SLOT(trigger()));
+            setCameraMode(curMode);
+            //connect(videoRender,SIGNAL(repaintOver()),this,SLOT(trigger()));
         }
 
     }else{
@@ -191,5 +209,5 @@ VideoCapture::~VideoCapture()
         while(thr.isRunning());
     }
 
-    qDebug("~VideoCapture");
+    INFO_DEBUG("~VideoCapture");
 }

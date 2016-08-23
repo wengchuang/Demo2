@@ -8,6 +8,8 @@
 #include <Windows.h>
 #endif
 
+#include <QTimer>
+
 class VideoRender : public QWidget
 {
     Q_OBJECT
@@ -34,8 +36,12 @@ protected:
 
 public slots:
     void flushImage();
+    void dealTimerOut();
 public:
     IRenderOpr*         curOpr;
+private:
+    int                 frames;
+    QTimer              timer;
 
 };
 

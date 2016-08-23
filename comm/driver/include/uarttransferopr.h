@@ -8,6 +8,7 @@
 #endif
 
 
+
 class UartTransferOpr : public ITransferOpr
 {
 public:
@@ -17,6 +18,7 @@ public:
     bool  transferInit();
     int   sendData(void* buf, int length);
     int   readData(void* buf, int length);
+    void  setPortName(const QString& portName);
     bool  transferUninit();
 
     ~UartTransferOpr(){transferUninit();}
@@ -27,6 +29,7 @@ private:
     Win_QextSerialPort          *port;
 #endif
     QString      oprName;
+    QString      portName;
 };
 
 #endif // UARTTRANSFEROPR_H

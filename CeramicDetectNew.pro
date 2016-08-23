@@ -1,12 +1,18 @@
 QT += gui
 
+
+
 win32 {
 
+include (H:/Qt/qtctrl/qwt-6.1.3/qwt.prf)
+
 INCLUDEPATH += H:/opencv/build/include \
-               H:/opencv/build/include/opencv
+               H:/opencv/build/include/opencv \
+               H:/Qt/qtctrl/qwt-6.1.3/src
 
 LIBS    += -LH:/opencv/build/x86/vc9/lib -lopencv_core245  -lopencv_highgui245 -lopencv_imgproc245 -lopencv_ml245 \
-           -LH:/work/github/Demo/lib -ltoupcam -ldetect -lMVCAMSDK
+           -LH:/work/github/Demo/lib -ltoupcam -ldetect -lMVCAMSDK \
+           -LH:/Qt/qtctrl/build-qwt-unknown-Release/lib -lqwt
 
 SOURCES += comm/driver/uart/win/qextserialbase.cpp \
     comm/driver/uart/win/qextserialenumerator.cpp \
@@ -73,7 +79,12 @@ SOURCES += \
     handle/handlermanager.cpp \
     handle/demohandler.cpp \
     handle/demohandler2.cpp \
-    systemsource.cpp
+    systemsource.cpp \
+    app/mysliderbutton.cpp \
+    app/mygauge2.cpp \
+    app/exportdlg.cpp \
+    Barchart.cpp \
+    video/capture/virtualcapopr.cpp
 
 
 HEADERS += \
@@ -124,6 +135,14 @@ HEADERS += \
     include/algargs.h \
     handle/demohandler2.h \
     util/Interface/include/ifmtconverter.h \
-    include/systemsource.h
+    include/systemsource.h \
+    app/mysliderbutton.h \
+    app/mygauge2.h \
+    debugredirect.h \
+    app/exportdlg.h \
+    Barchart.h \
+    video/include/virtualcapopr.h
+
+FORMS +=
 
 

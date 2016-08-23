@@ -46,6 +46,7 @@ public:
     bool  openCamera();
     bool  saveCameraCfgToFile(const T_SaveItem& tSaveItem,const T_CameraCapbility& tCapbility);
     inline ICaptureOpr* getCaptureOpr(){return curCap->capOpr;}
+    void setCameraMode(Camera::CameraMode mode);
 
     ~VideoManager();
     void  snapPic();
@@ -85,7 +86,7 @@ private:
     QList<IRenderOpr*>                  rendersOprList;
     QList<IAlgorithm*>                  algosList;
 
-    VideoCapture*                       curCap;
+    ::VideoCapture*                       curCap;
     VideoRender*                        curRender;
     ImageProcesser*                     curProcesser;
 

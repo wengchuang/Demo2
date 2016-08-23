@@ -22,6 +22,15 @@ Appconfig::Appconfig(QObject *parent) :
         writer->setValue("LibConfig/libsNames",QVariant(QStringList()<<"123"<<"456"));
         writer->setValue("CurVideoCfg/algoName",QVariant("SimpleAlgo"));
         writer->setValue("CurVideoCfg/renderName",QVariant("ScrollRenderOpr"));
+        writer->setValue("CurVideoCfg/virCapDir",QVariant("./virtualworkdir"));
+        writer->setValue("Camera/mode",QVariant((int) (Camera::MODE_AUTO) ));
+        writer->setValue("Camera/snappath","./");
+
+        writer->setValue("LineCfg/RedLineIndexs",QVariant(QStringList()<<"1"<<"2"<<"3"));
+        writer->setValue("LineCfg/BlackLineCtrlIndexs",QVariant(QStringList()<<"1"<<"2"<<"3"<<"4"<<"5"));
+        writer->setValue("LineCfg/BlackChannelIndexs",QVariant(QStringList()<<"4"<<"5"<<"6"<<"7"<<"8"));
+
+        writer->setValue("Device/SerialPortName","com4");
     }
 }
 bool  Appconfig::setExpoGainCfg(const QString& capName,const T_CameraCapbility& tCapbility)
@@ -40,6 +49,69 @@ bool Appconfig::setTempColorCfg(const QString& capName,const T_CameraCapbility& 
     }
     return ret;
 }
+bool Appconfig::getCameraMode(Camera::CameraMode& mode)
+{
+    mode =(Camera::CameraMode)writer->value("Camera/mode").toInt();
+    return true;
+}
+bool  Appconfig::setCameraMode(Camera::CameraMode& mode)
+{
+    writer->setValue("Camera/mode",(int)(mode));
+    return true;
+}
+
+bool Appconfig::setSnapPath(const QString& path)
+{
+    writer->setValue("Camera/snappath",path);
+    return true;
+}
+bool Appconfig::getSnapPath(QString& path)
+{
+    path = writer->value("Camera/snappath").toString();
+    return true;
+}
+bool Appconfig::getVirtualCapoprDir(QString& loadPath)
+{
+    loadPath = writer->value("CurVideoCfg/virCapDir").toString();
+    return true;
+}
+
+bool Appconfig::getSerialPortName(QString& portName)
+{
+    portName = writer->value("Device/SerialPortName").toString();
+    return true;
+}
+bool Appconfig::getLineCfg(LineCfg& cfg)
+{
+    QStringList list1 = writer->value("LineCfg/RedLineIndexs").toStringList();
+    QString str1,str2;
+    int i,Cnt;
+    cfg.redIndexs.clear();
+    foreach (str1, list1) {
+        cfg.redIndexs.append(str1.toInt());
+    }
+
+    list1 = writer->value("LineCfg/BlackLineCtrlIndexs").toStringList();
+    QStringList list2 = writer->value("LineCfg/BlackChannelIndexs").toStringList();
+
+    Cnt = list1.count();
+    cfg.blackmap.clear();
+    for(i = 0; i < Cnt; i++){
+        str1 = list1.at(i);
+        str2 = list2.at(i);
+        cfg.blackmap.insert(str1.toInt(),str2.toInt());
+    }
+
+
+    return true;
+}
+
+bool Appconfig::setSerialPortName(const QString& portName)
+{
+    writer->setValue("Device/SerialPortName",portName);
+    return true;
+}
+
 bool Appconfig::loadSaveCfg(const QString& capName,T_CameraCapbility& tCapbility)
 {
     QVariant variant;

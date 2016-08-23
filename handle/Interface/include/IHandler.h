@@ -1,12 +1,15 @@
 #ifndef IHANDLER_H
 #define IHANDLER_H
 #include <QString>
+#include <QObject>
 
 class IHandler{
+
 public:
     enum IHandlerType{
         HANDLE_MIN,
         HANDLE_ALGORET,
+        HANDLE_UI,
         HANDLE_MAX
     };
     IHandler(QString name = "NULL", const IHandlerType& type = HANDLE_ALGORET,const int& id = 0):name(name),handlerType(type),handlerId(id){}

@@ -1,5 +1,6 @@
 #include "systemsource.h"
 #include "videomanager.h"
+#include "deviceoprmanager.h"
 #include "handle/handlermanager.h"
 
 SystemSource* SystemSource::instance = NULL;
@@ -23,6 +24,9 @@ bool SystemSource::sourceInit()
     bool ret = false;
     if(isInit == false){
         if(VideoManager::getInstance()->managerInit() == 0){
+
+            DeviceOprManager::getInstance()->managerOprInit();
+
             if(HandlerManager::getInstance()->handlerManagerInit()){
                 ret = true;
                 isInit = true;
@@ -36,5 +40,6 @@ bool SystemSource::sourceInit()
 SystemSource::~SystemSource()
 {
     delete VideoManager::getInstance();
+    delete DeviceOprManager::getInstance();
     delete HandlerManager::getInstance();
 }

@@ -8,7 +8,8 @@ public:
     bool handlerInit(){ return true;}
     bool handlerUninit() {return true;}
     bool handlerExec(void* buf,const int& length);
-    DemoHandler(QString name);
+    bool hasUIItem(){return true;}
+    DemoHandler(QString name,const IHandlerType& type,const int& id);
 };
 
 #endif // DEMOHANDLER_H

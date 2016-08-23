@@ -71,7 +71,7 @@ public:
         if(!mattedList.isEmpty()){
             item = mattedList.takeFirst();
         }else{
-            //INFO_DEBUG("getMattedDataItem empty ...");
+            INFO_DEBUG("getMattedDataItem empty ...");
         }
         return item;
     }
@@ -84,7 +84,7 @@ public:
             ret = imageList.takeFirst();
             preMatList.append(ret);
         }else{
-            //qDebug()<<"getImage empty ... ";
+            INFO_DEBUG("getImage empty ... ");
         }
         return ret;
     }

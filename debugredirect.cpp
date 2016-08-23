@@ -1,14 +1,13 @@
 #include <QFile>
 #include <QDateTime>
 #include <QTextEdit>
-//#include "centerwidget.h"
+#include "mainwindown.h"
 #include "debugredirect.h"
-//#define LOGFILENAME     "debuglog.txt"
+#define LOGFILENAME     "debuglog.txt"
 static QFile outFile;
 static QTextStream ts;
 
 void messageHandler(QtMsgType type,const char*msg){
-    #if 1
     QString txt;
     switch(type){
     case QtDebugMsg:
@@ -29,18 +28,16 @@ void messageHandler(QtMsgType type,const char*msg){
 
 
     QString dateTime = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
-#if 0
     if(!outFile.isOpen()){
         outFile.setFileName(LOGFILENAME);
         outFile.open(QIODevice::WriteOnly | QIODevice::Append);
         ts.setDevice(&outFile);
     }
     ts<<dateTime<<endl<<txt<<endl;
-#endif
     dateTime +="\n";
 
-   // QString logTxt = dateTime+"    "+txt;
-   // CenterWidget::updateLog(type,logTxt);
-    qDebug()<<txt;
-        #endif
+   QString logTxt = dateTime+"    "+txt;
+   MainWindown::updateLog(type,logTxt);
+
+   qDebug()<<txt;
 }

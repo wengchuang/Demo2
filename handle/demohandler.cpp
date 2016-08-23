@@ -2,13 +2,12 @@
 #include <QDebug>
 
 
-DemoHandler::DemoHandler(QString name):IHandler(name)
+DemoHandler::DemoHandler(QString name,const IHandlerType& type,const int& id):IHandler(name,type,id)
 {
 
 }
 bool DemoHandler::handlerExec(void* buf,const int& length)
 {
-    qDebug("demo2");
     return true;
 }
 

@@ -343,6 +343,13 @@ enum CameraArgs{
     GAMAID
 };
 
+enum CameraMode{
+    MODE_MINI,
+    MODE_AUTO,
+    MODE_EXTERN,
+    MODE_MAX
+};
+
 }
 
 

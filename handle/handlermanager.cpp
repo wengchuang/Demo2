@@ -1,7 +1,9 @@
 #include "handlermanager.h"
 #include "demohandler.h"
 #include "demohandler2.h"
+#include "debugredirect.h"
 #include <QDebug>
+#include <QMutexLocker>
 
 HandlerManager* HandlerManager::instance = NULL;
 
@@ -34,9 +36,9 @@ bool  HandlerManager::handlerManagerInit()
 }
 bool HandlerManager::constructHandlers()
 {
-    IHandler* tmpHandler = new DemoHandler("demo");
+    IHandler* tmpHandler = new DemoHandler("demo",IHandler::HANDLE_UI,1);
     registerHandler(tmpHandler);
-    tmpHandler = new DemoHandler2("SimpleAlgo");
+    tmpHandler = new DemoHandler2("any");
     registerHandler(tmpHandler);
     return true;
 }
@@ -47,11 +49,7 @@ bool HandlerManager::registerHandler( IHandler* handler)
     if((handler->getHandleType() > IHandler::HANDLE_MIN) && (handler->getHandleType() < IHandler::HANDLE_MAX)){
         tmpList=handlerMap.value(handler->getHandleType());
         tmpList.append(handler);
-        qDebug()<<"tmpList.count():"<<tmpList.count();
-
-         handlerMap.insert(handler->getHandleType(),tmpList);
-
-
+        handlerMap.insert(handler->getHandleType(),tmpList);
         ret = handler->handlerInit();
     }
     return ret;
@@ -60,7 +58,10 @@ bool  HandlerManager::constructHandleMsg(const HandleMsg& msg ,IAlgorithm* pAlgo
 {
     bool ret = false;
     HandleMsg* item;
-    qDebug()<<"last items:"<<itemList.count();
+    if(itemList.count() == MAXHANLEMSGCNT){
+       INFO_DEBUG(QString("itemList.count() =%1").arg(itemList.count()).toLocal8Bit().data());
+    }
+
 
     if((msg.type == IHandler::HANDLE_ALGORET) && (pAlgo)){
 
@@ -106,9 +107,11 @@ void  HandlerManager::run()
     HandleMsg* item;
     QList<IHandler*> handlers;
     IHandler* handler;
-    int i,itemCnt;
+    bool execRet = false;
+    int i;
     while(!unInit){
       waitCon.wait(&mutex);
+
       while(!unInit){
           while(itemList.count()){
 
@@ -117,9 +120,9 @@ void  HandlerManager::run()
               handlers = handlerMap.value(item->type);
               foreach (handler, handlers) {
                   if(handler->getHandleType() == IHandler::HANDLE_ALGORET){
-                      if(handler->getName() == item->name ){
-                          handler->handlerExec(item->context,item->contextLen);
-                          if(handler->hasUIItem()){
+                      if(handler->getName() == item->name || handler->getName() == "any"){
+                          execRet = handler->handlerExec(item->context,item->contextLen);
+                          if(execRet && handler->hasUIItem()){
                              item->action = WAITFORUI;
                              forUIItemList.append(itemList.takeAt(0));
                              emit hasDataForUI(item);
@@ -129,6 +132,7 @@ void  HandlerManager::run()
                       }
 
                   }else if(handler->handleId() == item->handlerId){
+
                       handler->handlerExec(item->context,item->contextLen);
                       if(handler->hasUIItem()){
                          item->action = WAITFORUI;
@@ -140,20 +144,21 @@ void  HandlerManager::run()
                   }
               }
 
-              itemCnt = forUIItemList.count();
 
-              for (i=0;i<itemCnt; i++) {
+              for (i=0;i<forUIItemList.count();) {
                  item = forUIItemList.at(i);
                  if(item->action == UIDEALDONE){
                      item->action = NONE;
                      forUIItemList.takeAt(i);
                      emptyItemList.append(item);
-
-                  }
+                  }else{
+                     i++;
+                 }
 
               }
 
           }
+
 
       }
     }

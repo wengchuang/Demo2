@@ -17,15 +17,20 @@ bool MudbusMaster::send15Code(ITransferOpr* opr,const T_UsrData& tUsrData)
     if(tUsrData.funCode == 0xf){
         if(transCmd(opr,tUsrData)){
             do{
-                recvLen += readRet;
                 readRet = opr->readData(recvBuf + recvLen,responLen);
-            }while(readRet > 0);
+                recvLen += readRet;
+            }while((readRet > 0) && (recvLen < 8));
             if(recvLen == 8){
-                pFdata = (PT_FunData) pFdata;
-                if((pFdata->count == tUsrData.count) &&
+                pFdata = (PT_FunData) recvBuf;
+                unsigned short cnt;
+                memcpy(&cnt,&(pFdata->count),sizeof(unsigned short));
+                cnt = be16tole16(cnt);
+
+                if((cnt == tUsrData.count) &&
                         (pFdata->funCode == tUsrData.funCode) &&
                         (pFdata->slaveId == tUsrData.slaveId) &&
                         (pFdata->startAddr == tUsrData.startAddr)){
+
                         crcPtr = (unsigned short*)&(recvBuf[6]);
                         if(*crcPtr == Util::CrcOpr::checkCRC(recvBuf,6)){
                             ret =  true;

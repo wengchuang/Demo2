@@ -12,8 +12,10 @@
 #include <QProcess>
 #include <QTimerEvent>
 #include "argssetting.h"
+#include "mygauge2.h"
+#include "handle/handlermanager.h"
 
-//#include "exportdlg.h"
+#include "exportdlg.h"
 
 
 class MainWindown : public QWidget
@@ -30,6 +32,7 @@ protected:
 
 public slots:
     void btnClicked();
+    void upDateUI(HandleMsg* msg);
 
 private:
     void UI_CameraOpened(bool isOpened);
@@ -87,6 +90,8 @@ private:
 
     ArgsSetting*               settingWidgets;
     QProcess*                  process;
+    myGauge2*                  gaugeWidget;
+    ExportDlg*                  exportDlg;
 
 };
 

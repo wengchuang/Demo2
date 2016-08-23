@@ -14,7 +14,7 @@ class ImageProcesser : public QObject
 public:
     explicit ImageProcesser(QObject *parent = 0);
     void installAlgo(IAlgorithm* algo);
-    inline void snapPic(){this->isSnap = true;}
+    inline void snapPic(const QString& filePath){this->filePath =  filePath;this->isSnap = true;}
     virtual ~ImageProcesser();
 signals:
     void processImageOver();
@@ -33,6 +33,7 @@ private:
     bool            isBusy;
     bool            isSnap;
     bool            isAlgoInit;
+    QString         filePath;
 };
 
 #endif // IMAGEPROCESSER_H

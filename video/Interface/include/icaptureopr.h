@@ -31,8 +31,9 @@ public:
     virtual bool getCameraArgs(Camera::CameraArgs argId,QVariant& value) = 0;
     virtual void trigger2() = 0;
     virtual bool grabFrame() = 0;
+    virtual void setCameraMode(Camera::CameraMode mode){Q_UNUSED(mode);}
     virtual void getCameraCapbility(PT_CameraCapbility pCapbility)=0;
-    virtual bool snapPic(){return false;}
+    virtual bool snapPic(const QString& filePath){Q_UNUSED(filePath); return false;}
 
 
 #ifdef _WIN32

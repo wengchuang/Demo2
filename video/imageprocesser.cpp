@@ -20,10 +20,12 @@ void ImageProcesser::installAlgo(IAlgorithm* algo)
 
 void ImageProcesser::saveSanptoFile(DataItem* item)
 {
+    static int index = 0;
     if(item->reverseRGB){
         cvtColor(item->mat,item->mat,CV_BGR2RGB);
     }
-    item->image.save("123.jpg");
+    QString fileName = filePath +"/ImageProcesser" + QString::number(index++) + ".jpg";
+    item->image.save(fileName);
     item->reverseRGB = false;
     isSnap = false;
 }
