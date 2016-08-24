@@ -73,6 +73,7 @@ private:
     QPushButton* portEnsureBtn;
     QComboBox  * portNameComBox;
     QSpinBox*    ioPullTime;
+    QSpinBox*    timeOutSpBox;
     QLineEdit*   pathEdit;
     QVBoxLayout* tmpLay;
     QWidget*     curWidget;
@@ -83,6 +84,7 @@ private:
 
     QList<QComboBox*> lineCntrlComList;
     QList<QComboBox*> redLineCntrlComList;
+    QList<QComboBox*> blackLineCntrlComList;
     QList<QWidget*>   lineCntrlWidgets;
     QVBoxLayout*      lineCfgInVBox;
     QList<QLayout*>   lineCfgLays;

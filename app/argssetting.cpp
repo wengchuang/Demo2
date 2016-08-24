@@ -42,7 +42,15 @@ void ArgsSetting::showEvent(QShowEvent* ev)
     if(parent){
         QRect rect = parent->geometry();
         this->setGeometry(rect.x()+rect.width()/4,rect.y()+rect.height()/4,rect.width()/2,rect.height()/2);
-    }
+        if(externRadioBtn->isChecked()){
+            if(VideoManager::getInstance()->getCaptureOpr()->objectName() == "VirtualCapOpr"){
+                curWidget->show();
+            }else{
+                curWidget->hide();
+            }
+
+        }
+}
 }
 
 void ArgsSetting::editingFinished()
@@ -145,6 +153,8 @@ void ArgsSetting::UI_uninit()
     foreach(btn,btns){
         btn->setEnabled(false);
     }
+    ensureBtns.value("LineCfgBtn")->setEnabled(true);
+    ensureBtns.value("TimeOutEnsureBtn")->setEnabled(true);
     disconnect(resBox,SIGNAL(currentIndexChanged(int)),this,SLOT(comBoxIndexChanaged(int)));
 }
 void ArgsSetting::UI_chanageCapbility()
@@ -654,9 +664,10 @@ QWidget* ArgsSetting::createExternTriggerWidget()
     externTriggerWidget = new QWidget;
 
     QVBoxLayout* mainLay = new QVBoxLayout;
-    mainLay->setAlignment(Qt::AlignCenter);
+    mainLay->setAlignment(Qt::AlignRight);
     QHBoxLayout* hLay = new QHBoxLayout;
-    hLay->setAlignment(Qt::AlignCenter);
+    hLay->setAlignment(Qt::AlignRight);
+#if 0
     QLabel* lab = new QLabel(QString::fromLocal8Bit("IO轮询时间间隔："));
     lab->setFixedWidth(120);
     lab->setAlignment(Qt::AlignRight);
@@ -674,7 +685,8 @@ QWidget* ArgsSetting::createExternTriggerWidget()
     hLay->addWidget(ioPullTime);
 
     hLay->addSpacing(200);
-    IOPullBtn = new QPushButton(QString::fromLocal8Bit("确定"));
+#endif
+    IOPullBtn = new QPushButton(QString::fromLocal8Bit("下一帧"));
     connect(IOPullBtn,SIGNAL(clicked()),this,SLOT(btnClicked()));
     setPushBtnStyle(IOPullBtn);
     hLay->addWidget(IOPullBtn);
@@ -720,7 +732,10 @@ void ArgsSetting::radioBtnClicked()
             tmpLay->removeWidget(curWidget);
             tmpLay->addWidget(externTriggerWidget);
             curWidget = externTriggerWidget;
-            curWidget->show();
+            if(VideoManager::getInstance()->getCaptureOpr()->objectName() == "VirtualCapOpr"){
+                curWidget->show();
+            }
+
             VideoManager::getInstance()->setCameraMode(Camera::MODE_EXTERN);
 
         }
@@ -738,19 +753,21 @@ QLayout* ArgsSetting::createOutTimeLayout()
 
     QLabel* lab = new QLabel(QString::fromLocal8Bit("IO输出超时："));
     lab->setFixedWidth(100);
-    QSpinBox* sbBox = new QSpinBox;
-    sbBox->setSingleStep(20);
-    sbBox->setRange(30,500);
-    sbBox->setSuffix("ms");
-    sbBox->setFixedWidth(60);
+    timeOutSpBox = new QSpinBox;
+    timeOutSpBox->setSingleStep(20);
+    timeOutSpBox->setRange(30,500);
+    timeOutSpBox->setSuffix("ms");
+    timeOutSpBox->setFixedWidth(60);
 
     inHLay->addWidget(lab);
-    inHLay->addWidget(sbBox);
+    inHLay->addWidget(timeOutSpBox);
     inVLay->addLayout(inHLay);
 
     inHLay = new QHBoxLayout;
     inHLay->addStretch(1);
     QPushButton* btn = new QPushButton(QString::fromLocal8Bit("确定"));
+    ensureBtns.insert("TimeOutEnsureBtn",btn);
+    connect(btn,SIGNAL(clicked()),this,SLOT(btnClicked()));
     setPushBtnStyle(btn);
     inHLay->addWidget(btn);
     inVLay->addLayout(inHLay);
@@ -917,6 +934,8 @@ QLayout* ArgsSetting::createOutputCfgLayout()
     QHBoxLayout* hLay = new QHBoxLayout;
     hLay->setAlignment(Qt::AlignRight);
     QPushButton* btn = new QPushButton(QString::fromLocal8Bit("确定"));
+    connect(btn,SIGNAL(clicked()),this,SLOT(btnClicked()));
+    ensureBtns.insert("LineCfgBtn",btn);
     setPushBtnStyle(btn);
     hLay->addWidget(btn);
     vLay->addLayout(hLay);
@@ -958,6 +977,7 @@ QLayout* ArgsSetting::createBlackLineCfgLayout(const LineCfg& lineCfg)
         comBox = new QComboBox;
         comBox->setObjectName(QString("blackLineCfg%1").arg(i+1));
         lineCntrlComList.append(comBox);
+        blackLineCntrlComList.append(comBox);
         comBox->addItems(comList);
         value = lineCfg.blackmap.value(i+1,-1);
         if(value > 0){
@@ -1061,6 +1081,7 @@ QLayout*ArgsSetting::createModeSetLayout()
             externRadioBtn->setChecked(true);
             curWidget = externTriggerWidget;
         }
+        VideoManager::getInstance()->setCameraMode(mode);
     }
 
     connect(autoRadioBtn,SIGNAL(clicked()),this,SLOT(radioBtnClicked()));
@@ -1113,6 +1134,9 @@ void ArgsSetting::btnClicked()
        }
 
     }else if(btn == IOPullBtn){
+        qDebug()<<VideoManager::getInstance()->getCaptureOpr()->curFileName();
+        VideoManager::getInstance()->getCaptureOpr()->virtualTrigger();
+
 
     }else if(btn == portEnsureBtn){
 
@@ -1159,6 +1183,22 @@ void ArgsSetting::btnClicked()
         tCapbility.sContrastRange.iSaved = valueMap.value(CONTRAST)->text().toInt();
         tCapbility.sGammaRange.iSaved   = valueMap.value(GAMA)->text().toInt();
         VideoManager::getInstance()->saveCameraCfgToFile(tSaveItem,tCapbility);
+    }else if(btn == ensureBtns.value("LineCfgBtn")){
+        LineCfg cfg;
+        int i;
+        int cnt = lineCntrlComList.at(0)->currentIndex() + 1;
+        for(i = 0 ;i < cnt; i++){
+           cfg.redIndexs.append((redLineCntrlComList.at(i)->currentIndex()+1));
+        }
+
+        for(i = 0; i < MAXCHANNELCNT ; i++){
+            if(blackLineCntrlComList.at(i)->currentIndex() != MAXCHANNELCNT){
+                cfg.blackmap.insert(i+1,blackLineCntrlComList.at(i)->currentIndex()+1);
+            }
+        }
+        Appconfig::getInstance()->setLineCfg(cfg);
+    }else if(btn == ensureBtns.value("TimeOutEnsureBtn")){
+        Appconfig::getInstance()->setTimeOut(timeOutSpBox->text().remove("ms").toInt());
     }
 
 }

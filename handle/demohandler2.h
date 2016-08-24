@@ -18,7 +18,6 @@ public:
 
 private:
     IOBoardService* ioService;
-    LineCfg   lineCfg;
     bool      bUIData;
 
 };

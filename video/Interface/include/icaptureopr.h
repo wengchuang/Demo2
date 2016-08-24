@@ -30,6 +30,8 @@ public:
     virtual bool setCameraArgs(Camera::CameraArgs argId,const QVariant& variant) = 0;
     virtual bool getCameraArgs(Camera::CameraArgs argId,QVariant& value) = 0;
     virtual void trigger2() = 0;
+    virtual void virtualTrigger(){}
+    virtual QString curFileName(){return "NULL";}
     virtual bool grabFrame() = 0;
     virtual void setCameraMode(Camera::CameraMode mode){Q_UNUSED(mode);}
     virtual void getCameraCapbility(PT_CameraCapbility pCapbility)=0;

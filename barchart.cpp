@@ -50,26 +50,25 @@ public:
     virtual void draw(QPainter *p, const QwtColumnRect &rect) const
     {
         QRectF rect2 = rect.toRect();
+
+
         p->setBrush(d_color);
         p->setPen(Qt::NoPen);
-        p->drawRect(rect.toRect());
+        p->drawRect(rect.toRect().x(),rect.toRect().y()+10,rect.toRect().width(),rect.toRect().height());
         p->setPen(Qt::black);
         int top = rect2.top();
         int height = rect2.height();
         Qt::Alignment alignment;
-        if (d_hit >= 0)
-        {
+        if (d_hit >= 0){
             top -= 15;
             height += 15;
             alignment = Qt::AlignTop | Qt::AlignHCenter;
-        }
-        else
-        {
+        }else{
             height += 15;
             alignment = Qt::AlignBottom | Qt::AlignHCenter;
         }
         p->setPen(Qt::white);
-        p->drawText(QRect(rect2.left(), top, rect2.width(), height), alignment, QString::number(d_hit));
+        p->drawText(QRect(rect2.left(), top+10, rect2.width(), height), alignment, QString::number(d_hit));
     }
 private:
     int d_hit;
@@ -81,6 +80,9 @@ class DistroChartItem:public QwtPlotBarChart{
     DistroChartItem():QwtPlotBarChart("Page Hits"){
         setLegendMode(QwtPlotBarChart::LegendBarTitles);
         setLegendIconSize(QSize(0,0));
+    }
+    void clearData(){
+      dataList.clear();
     }
     void addData(double data){
         dataList += data;
@@ -100,15 +102,6 @@ class DistroChartItem:public QwtPlotBarChart{
         symbol->setLineWidth(1);
         symbol->setFrameStyle(QwtColumnSymbol::Plain);
         return symbol;
-    }
-
-    virtual QwtText barTitle(int sampleIndex) const{
-        QwtText title;
-
-        if(sampleIndex >=0 && sampleIndex < distros.size()){
-            title = distros[sampleIndex];
-        }
-        return title;
     }
 
 private:
@@ -143,8 +136,7 @@ Barchart::Barchart(QWidget *parent) :
     canvas->setFrameStyle(QFrame::Box);
     canvas->setBorderRadius(10);
 
-
-    setTitle( "DistroWatch Page Hit Ranking, April 2012" );
+    setTitle("生产报表");
 
     item = new DistroChartItem;
 
@@ -167,10 +159,10 @@ Barchart::Barchart(QWidget *parent) :
     item->setMargin(30);
 
     setAxisMaxMinor(QwtPlot::xBottom,3);
-    setAxisMaxMajor(QwtPlot::xBottom,10);
+    //setAxisMaxMajor(QwtPlot::xBottom,10);
     setAxisScaleDraw(QwtPlot::xBottom,new DistroScaleDraw(Qt::Vertical,mDistros));
 
-    setAxisTitle( QwtPlot::yLeft, QString::fromAscii("砖块数量") );
+    setAxisTitle(QwtPlot::yLeft, QString::fromAscii("砖块数量") );
     setAxisMaxMinor( QwtPlot::yLeft, 3 );
 
     QwtScaleDraw *scaleDraw = new QwtScaleDraw();
@@ -189,9 +181,30 @@ Barchart::Barchart(QWidget *parent) :
     setAutoReplot(false);
 
 
+
 }
+void Barchart::repaintChart(const QString& title,QVector<double>& samples)
+{
+    item->clearData();
+    while(samples.count() < sizeof(pageHits)/(sizeof(pageHits[0]))){
+        samples.append(0);
+    }
+
+    for(uint i = 0; i < sizeof(pageHits)/(sizeof(pageHits[0]));i++){
+        item->addData(samples[i]);
+    }
+
+    item->setSamples(samples);
+    setAxisTitle(QwtPlot::xBottom, title);
+
+
+
+    replot();
+}
+
+
 void Barchart::exportChart()
 {
     QwtPlotRenderer renderer;
-    renderer.exportTo( this, "distrowatch.pdf" );
+    renderer.exportTo( this, "生产报表.pdf" );
 }

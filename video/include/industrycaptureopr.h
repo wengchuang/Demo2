@@ -26,7 +26,6 @@ public:
     bool getCameraArgs(Camera::CameraArgs argId,QVariant&value);
     bool snapPic(const QString& filePath);
     virtual ~IndustryCaptureOpr();
-
 protected:
     bool    grabFrame();
     void    trigger2();
@@ -40,6 +39,7 @@ private:
     tSdkImageResolution   *curImageSizeDesc;
     unsigned char*          rawData;
     int                     g_hCamera;
+    int                     m_mode;
     bool                    bSupport;
     bool                    bCloseCapture;
     bool                    ispause;

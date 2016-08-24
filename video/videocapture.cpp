@@ -34,7 +34,6 @@ void VideoCapture::initBase()
     bStop = false;
     Appconfig::getInstance()->getCameraMode(curMode);
 
-    //connect(this,SIGNAL(imageComming()),this,SLOT(putImage()));
 
 }
 void VideoCapture::setCameraMode(Camera::CameraMode mode)
@@ -42,13 +41,13 @@ void VideoCapture::setCameraMode(Camera::CameraMode mode)
     if(capOpr && videoRender){
         capOpr->setCameraMode(mode);
         if(mode == Camera::MODE_AUTO){
-            connect(videoRender,SIGNAL(repaintOver()),this,SLOT(trigger()));
             if(capOpr->isOpened()){
                 this->trigger();
             }
         }else if(mode == Camera::MODE_EXTERN){
-            disconnect(videoRender,SIGNAL(repaintOver()),this,SLOT(trigger()));
+            //disconnect(videoRender,SIGNAL(repaintOver()),this,SLOT(trigger()));
         }
+        curMode = mode;
 
     }
 }
@@ -117,6 +116,7 @@ void VideoCapture::putImage()
             if(item){
                  memcpy(item->data.data()+item->offset, capOpr->picData.data(), capOpr->picData.size());
                  item->reverseRGB = capOpr->reverseRGB;
+                 item->videoMode  = curMode;
                  DataManager::getInstance()->putPreMatDataItem(item);
                  emit capOneFrame();
             }
@@ -153,7 +153,7 @@ void  VideoCapture::installVideoRender(VideoRender*render)
         connect(this,SIGNAL(capOneFrame()),processer,SLOT(processImage()));
         connect(processer,SIGNAL(processImageOver()),videoRender,SLOT(flushImage()));
         setCameraMode(curMode);
-        //connect(videoRender,SIGNAL(repaintOver()),this,SLOT(trigger()));
+        connect(videoRender,SIGNAL(repaintOver()),this,SLOT(trigger()));
 
     }else{
 #ifdef _WIN32
@@ -185,7 +185,7 @@ void  VideoCapture::installImageProcesser(ImageProcesser* algprocesser)
         if(videoRender){
             connect(processer,SIGNAL(processImageOver()),videoRender,SLOT(flushImage()));
             setCameraMode(curMode);
-            //connect(videoRender,SIGNAL(repaintOver()),this,SLOT(trigger()));
+            connect(videoRender,SIGNAL(repaintOver()),this,SLOT(trigger()));
         }
 
     }else{

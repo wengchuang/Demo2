@@ -34,6 +34,8 @@ private:
     bool            isSnap;
     bool            isAlgoInit;
     QString         filePath;
+    const QString   recordFilePath;
+    unsigned long   picIndex;
 };
 
 #endif // IMAGEPROCESSER_H

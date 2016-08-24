@@ -25,12 +25,13 @@ public:
     inline void setVideoRender(void* render){this->render = (VideoRender*)render;}
     inline void setWinIDAndMsgId(HWND&hwnd,UINT& nMsg){this->hwnd = hwnd;this->nMsg = nMsg;}
     virtual ~ToupCaptureOpr();
+protected:
+    bool    grabFrame();
+    void    trigger2();
 private:
     void  installLister();
 
-protected:
-    virtual bool    grabFrame();
-    virtual void    trigger2();
+
 private:
     HToupCam            cameraHandler;
     ToupcamInst         devices[TOUPCAM_MAX];

@@ -4,15 +4,15 @@ QT += gui
 
 win32 {
 
-include (H:/Qt/qtctrl/qwt-6.1.3/qwt.prf)
+include (D:/Qt/qtctrl/qwt-6.1.3/qwt.prf)
 
-INCLUDEPATH += H:/opencv/build/include \
-               H:/opencv/build/include/opencv \
-               H:/Qt/qtctrl/qwt-6.1.3/src
+INCLUDEPATH += D:/opencv/build/include \
+               D:/opencv/build/include/opencv \
+               D:/Qt/qtctrl/qwt-6.1.3/src
 
-LIBS    += -LH:/opencv/build/x86/vc9/lib -lopencv_core245  -lopencv_highgui245 -lopencv_imgproc245 -lopencv_ml245 \
-           -LH:/work/github/Demo/lib -ltoupcam -ldetect -lMVCAMSDK \
-           -LH:/Qt/qtctrl/build-qwt-unknown-Release/lib -lqwt
+LIBS    += -LD:/opencv/build/x86/vc9/lib -lopencv_core245  -lopencv_highgui245 -lopencv_imgproc245 -lopencv_ml245 \
+           -LD:/work/Project/Demo2/lib -ltoupcam -ldetect -lMVCAMSDK \
+           -LD:/Qt/qtctrl/build-qwt-unknown-Release/lib -lqwt
 
 SOURCES += comm/driver/uart/win/qextserialbase.cpp \
     comm/driver/uart/win/qextserialenumerator.cpp \
@@ -84,7 +84,8 @@ SOURCES += \
     app/mygauge2.cpp \
     app/exportdlg.cpp \
     Barchart.cpp \
-    video/capture/virtualcapopr.cpp
+    video/capture/virtualcapopr.cpp \
+    fileopr.cpp
 
 
 HEADERS += \
@@ -141,7 +142,8 @@ HEADERS += \
     debugredirect.h \
     app/exportdlg.h \
     Barchart.h \
-    video/include/virtualcapopr.h
+    video/include/virtualcapopr.h \
+    fileopr.h
 
 FORMS +=
 

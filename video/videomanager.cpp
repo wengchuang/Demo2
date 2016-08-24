@@ -8,6 +8,8 @@
 #include "simplerenderopr.h"
 #include "scrollrenderopr.h"
 #include "cvcaptureopr.h"
+#include "fileopr.h"
+#include <QDate>
 
 
 #include "ceramicdetectalgo.h"
@@ -255,11 +257,14 @@ bool VideoManager::getCaptureCapbility(PT_CameraCapbility pCapbility)
 void VideoManager::snapPic()
 {
     QString filePath;
+    QString dirName;
     Appconfig::getInstance()->getSnapPath(filePath);
 
     if(curCap->capOpr->isOpened()){
-        if(!(curCap->capOpr->snapPic(filePath))){
-            curProcesser->snapPic(filePath);
+        dirName = filePath + QString("/") + QDate::currentDate().toString("yyyy_MM_dd");
+        FileOpr::fileOprMkdir(dirName);
+        if(!(curCap->capOpr->snapPic(dirName))){
+            curProcesser->snapPic(dirName);
         }
     }
 }
@@ -379,22 +384,6 @@ int VideoManager::constructVideoCaptureOprs()
         degStr.sprintf("register capture:%s failed !",captureOpr->objectName().toUtf8().data());
         INFO_DEBUG(degStr.toUtf8().data());
     }
-#endif
-
-#ifdef _WIN32
-    captureOpr = new ToupCaptureOpr("ToupCaptureOpr");
-    if(registerCaptureOpr(captureOpr) < 0){
-        degStr.sprintf("register capture:%s failed !",captureOpr->objectName().toUtf8().data());
-        INFO_DEBUG(degStr.toUtf8().data());
-    }
-
-
-    captureOpr = new CVCaptureOpr("CVCaptureOpr");
-    if(registerCaptureOpr(captureOpr) < 0){
-        qDebug()<<"register capture:%s failed !"<<captureOpr->objectName();
-
-    }
-#endif
 
     captureOpr = new VirtualCapOpr("VirtualCapOpr");
     if(registerCaptureOpr(captureOpr) < 0){
@@ -406,6 +395,35 @@ int VideoManager::constructVideoCaptureOprs()
         VirtualCapOpr* virCapOpr = (VirtualCapOpr*) captureOpr;
         virCapOpr->setLoadPath(loadPath);
     }
+#endif
+
+#ifdef _WIN32
+    captureOpr = new ToupCaptureOpr("ToupCaptureOpr");
+    if(registerCaptureOpr(captureOpr) < 0){
+        degStr.sprintf("register capture:%s failed !",captureOpr->objectName().toUtf8().data());
+        INFO_DEBUG(degStr.toUtf8().data());
+    }
+
+    captureOpr = new VirtualCapOpr("VirtualCapOpr");
+    if(registerCaptureOpr(captureOpr) < 0){
+        degStr.sprintf("register capture:%s failed !",captureOpr->objectName().toUtf8().data());
+        INFO_DEBUG(degStr.toUtf8().data());
+    }else{
+        QString loadPath;
+        if(Appconfig::getInstance()->getVirtualCapoprDir(loadPath));
+        VirtualCapOpr* virCapOpr = (VirtualCapOpr*) captureOpr;
+        virCapOpr->setLoadPath(loadPath);
+    }
+
+    captureOpr = new CVCaptureOpr("CVCaptureOpr");
+    if(registerCaptureOpr(captureOpr) < 0){
+        qDebug()<<"register capture:%s failed !"<<captureOpr->objectName();
+
+    }
+
+#endif
+
+
 
 
     return 0;

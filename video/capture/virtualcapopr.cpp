@@ -52,8 +52,11 @@ bool VirtualCapOpr::openCapture(void)
         res->iIndex = 0;
         res->iWidth = image.width();
         res->iHeight = image.height();
+        char descBuf[50];
+        memset(descBuf,0,sizeof(descBuf));
+        sprintf(descBuf,"%d * %d",image.width(),image.height());
 
-        memcpy(res->acDescription,QString("%1 * %2").arg(image.width()).arg(image.height()).toLocal8Bit().data(),sizeof(QString("%1 * %2").arg(image.width()).arg(image.height()).toLocal8Bit().data()));
+        memcpy(res->acDescription,descBuf,strlen(descBuf));
         fmt->ImageSizeList.append(res);
 
         tCapbility.fmtsList.append(fmt);
@@ -69,6 +72,7 @@ bool VirtualCapOpr::openCapture(void)
         tCapbility.sGammaRange.ibUsed = 0;
         tCapbility.sShadesRange.ibUsed = 0;
         tCapbility.sBrightnessRange.ibUsed = 0;
+        tCapbility.sContrastRange.ibUsed = 0;
 
 
         this->iHeight = res->iHeight;
@@ -144,8 +148,9 @@ bool VirtualCapOpr::grabFrame()
 }
 void VirtualCapOpr::trigger2()
 {
-    if(bOpened)
-    emit imageComming();
+    if(bOpened  && (m_mode == Camera::MODE_AUTO))
+        emit imageComming();
+
 }
 VirtualCapOpr::~VirtualCapOpr()
 {

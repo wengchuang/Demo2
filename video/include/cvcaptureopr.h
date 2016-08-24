@@ -26,8 +26,8 @@ public:
     bool getCameraArgs(Camera::CameraArgs argId,QVariant&value);
     virtual ~CVCaptureOpr();
 protected:
-    virtual void    trigger2();
-    virtual bool    grabFrame();
+     void    trigger2();
+     bool    grabFrame();
 private:
     CvCapture*      pCapture;
     IplImage*       pFrame;

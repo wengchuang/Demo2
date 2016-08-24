@@ -156,13 +156,34 @@ void IndustryCaptureOpr::setCameraMode(Camera::CameraMode mode)
 
             CameraSetTriggerMode(g_hCamera,1);
             CameraSetTriggerCount(g_hCamera,1);
+            m_mode = Camera::MODE_AUTO;
 
         }else if (mode == Camera::MODE_EXTERN){
-            qDebug()<<"set mode extern";
-
+            m_mode = Camera::MODE_EXTERN;
+            int StrobeMode=0;
+            int  uPolarity=0;
+            //获得相机的触发模式。
             CameraSetTriggerMode(g_hCamera,2);
-            CameraSetTriggerCount(g_hCamera,1);
+            int _mode;
+            CameraGetTriggerMode(g_hCamera,&_mode);
+            qDebug()<<"triger mode :"<<_mode;
 
+            //设置相机的触发模式。0表示连续采集模式；1表示软件触发模式；2表示硬件触发模式。
+
+
+            CameraGetStrobeMode(g_hCamera,&StrobeMode);
+
+            CameraGetStrobePolarity(g_hCamera,&uPolarity);
+            if(StrobeMode){
+                CameraSetStrobePolarity(g_hCamera,1);
+                if(uPolarity){
+                    CameraSetStrobePolarity(g_hCamera,1);
+                }else{
+                    CameraSetStrobePolarity(g_hCamera,0);
+                }
+            }else{
+                CameraSetStrobePolarity(g_hCamera,0);
+            }
         }
     }
 }
@@ -248,7 +269,6 @@ bool IndustryCaptureOpr::snapPic(const QString& filePath)
         ret = true;
     }
 
-    qDebug()<<"CameraSnapToBuffer ret "<<ret;
     return ret;
 }
 
@@ -336,8 +356,10 @@ void IndustryCaptureOpr::trigger2()
         if(!ispause){
             //执行一次软触发。执行后，会触发由CameraSetTriggerCount指定的帧数。
             //curTime = QDateTime::currentDateTime();
+            if(m_mode == Camera::MODE_AUTO){
 
-            CameraSoftTrigger(g_hCamera);
+                CameraSoftTrigger(g_hCamera);
+           }
             emit imageComming();
         }else{
             return ;

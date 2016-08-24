@@ -2,6 +2,7 @@
 #include "videomanager.h"
 #include "deviceoprmanager.h"
 #include "handle/handlermanager.h"
+#include "appconfig.h"
 
 SystemSource* SystemSource::instance = NULL;
 
@@ -42,4 +43,5 @@ SystemSource::~SystemSource()
     delete VideoManager::getInstance();
     delete DeviceOprManager::getInstance();
     delete HandlerManager::getInstance();
+    delete Appconfig::getInstance();
 }

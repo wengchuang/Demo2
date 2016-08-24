@@ -14,6 +14,7 @@ class Barchart : public QwtPlot
 
 public:
     explicit Barchart(QWidget *parent = 0);
+    void     repaintChart(const QString& title,QVector<double>& samples);
 
 signals:
 

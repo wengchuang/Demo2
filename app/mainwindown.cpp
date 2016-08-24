@@ -40,11 +40,18 @@ MainWindown::MainWindown(QWidget *parent) :
     connect(runStatusBtn,SIGNAL(clicked()),this,SLOT(btnClicked()));
     connect(argsSetBtn,SIGNAL(clicked()),this,SLOT(btnClicked()));
     connect(exportBtn,SIGNAL(clicked()),this,SLOT(btnClicked()));
+    connect(exportDlg,SIGNAL(resetReport()),this,SLOT(restValues()));
     connect(HandlerManager::getInstance(),SIGNAL(hasDataForUI(HandleMsg*)),this,SLOT(upDateUI(HandleMsg*)));
 
     //process = new QProcess(this);
 
 
+}
+void MainWindown::restValues()
+{
+    foreach (QLineEdit* edit, edits) {
+        edit->clear();
+    }
 }
 void MainWindown::upDateUI(HandleMsg *msg)
 {
@@ -97,6 +104,12 @@ void MainWindown::btnClicked()
     }else if(btn == entryBtn){
 
     }else if(btn == exportBtn){
+        QVector<double> samples;
+        for(int i=0; i< 9;i++){
+            samples.append(edits[i]->text().toDouble());
+        }
+
+        exportDlg->setSamples(samples);
         exportDlg->exec();
     }
 }

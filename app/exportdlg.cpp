@@ -13,10 +13,14 @@
 ExportDlg::ExportDlg(QWidget *parent):BaseDialog(parent)
 {
     tableWidget = NULL;
+    barchart = NULL;
     this->setWindowTitle(QString::fromLocal8Bit("导出报表"));
     this->setLayout(createLayout());
-    //FileOpr::createExportFilePath();
     oldTime = QDateTime::currentDateTime();
+}
+void ExportDlg::setSamples(const QVector<double>& samples)
+{
+    this->samples = samples;
 }
 
 void ExportDlg::showEvent(QShowEvent *ev)
@@ -26,10 +30,11 @@ void ExportDlg::showEvent(QShowEvent *ev)
         this->setGeometry(rect.x()+rect.width()/4,rect.y()+rect.height()/4,rect.width()/2,510);
     }
 
-    if(tableWidget){
-
-
+    if(barchart){
+        barchart->repaintChart("生产报表 "+oldTime.toString("yyyy-MM-dd hh:mm - ")+
+                               QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm"),this->samples);
     }
+
 
     QWidget::showEvent(ev);
 }
@@ -41,6 +46,9 @@ void ExportDlg::btnClicked()
         barchart->exportChart();
 
     }else if(btn == resetBtn){
+        QVector<double> samples;
+        barchart->repaintChart(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm"),samples);
+        emit resetReport();
 
     }else if(btn == searchBtn){
 
@@ -68,12 +76,13 @@ QLayout* ExportDlg::createLayout()
     hLay->addWidget(saveBtn);
     connect(saveBtn,SIGNAL(clicked()),this,SLOT(btnClicked()));
     hLay->addStretch(1);
-
+#if 0
     searchBtn = new QPushButton(QString::fromLocal8Bit("历史报表"));
     setPushBtnStyle(searchBtn);
     hLay->addWidget(searchBtn);
     connect(searchBtn,SIGNAL(clicked()),this,SLOT(btnClicked()));
     hLay->addStretch(1);
+#endif
 
 
     resetBtn = new QPushButton(QString::fromLocal8Bit("重置报表"));

@@ -3,6 +3,8 @@
 
 
 Appconfig* Appconfig::instance = NULL;
+LineCfg  Appconfig::lineCfg;
+int  Appconfig::outPutTimeOut;
 
 Appconfig* Appconfig::getInstance()
 {
@@ -31,7 +33,10 @@ Appconfig::Appconfig(QObject *parent) :
         writer->setValue("LineCfg/BlackChannelIndexs",QVariant(QStringList()<<"4"<<"5"<<"6"<<"7"<<"8"));
 
         writer->setValue("Device/SerialPortName","com4");
+        writer->setValue("Device/OutPutTimeOut",QVariant(20));
     }
+    getLineCfg(lineCfg);
+    getTimeOut(outPutTimeOut);
 }
 bool  Appconfig::setExpoGainCfg(const QString& capName,const T_CameraCapbility& tCapbility)
 {
@@ -80,6 +85,44 @@ bool Appconfig::getSerialPortName(QString& portName)
 {
     portName = writer->value("Device/SerialPortName").toString();
     return true;
+}
+bool Appconfig::setLineCfg(const LineCfg& cfg)
+{
+    QStringList strList;
+    foreach (int value, cfg.redIndexs) {
+        strList << QString::number(value);
+    }
+
+    QStringList ctrlList;
+    QStringList channelsList;
+
+    QList<int> keys = cfg.blackmap.keys();
+    foreach (int key, keys) {
+        ctrlList << QString::number(key);
+        channelsList << QString::number(cfg.blackmap.value(key));
+    }
+
+    writer->setValue("LineCfg/RedLineIndexs",QVariant(strList));
+    writer->setValue("LineCfg/BlackLineCtrlIndexs",QVariant(ctrlList));
+    writer->setValue("LineCfg/BlackChannelIndexs",QVariant(channelsList));
+    emit lineCfgChanaged();
+    lineCfg = cfg;
+    return true;
+}
+bool Appconfig::getTimeOut(int& value)
+{
+    value = writer->value("Device/OutPutTimeOut").toInt();
+    return true;
+}
+bool Appconfig::setTimeOut(const int& value)
+{
+    bool ret = false;
+    if(value > 20 ){
+        writer->setValue("Device/OutPutTimeOut",QVariant(value));
+        outPutTimeOut = value;
+        ret = true;
+    }
+    return ret;
 }
 bool Appconfig::getLineCfg(LineCfg& cfg)
 {

@@ -21,12 +21,19 @@ public:
     void closeCapture();
     void getCameraCapbility(PT_CameraCapbility pCapbility);
     void setLoadPath(QString path);
+    void setCameraMode(Camera::CameraMode mode){this->m_mode = mode;}
+
 
 
     bool setCameraArgs(Camera::CameraArgs argId,const QVariant& variant);
     bool getCameraArgs(Camera::CameraArgs argId,QVariant&value);
-    virtual ~VirtualCapOpr();
+    void virtualTrigger(){
+        if((m_mode == Camera::MODE_EXTERN) && bOpened)
+            emit imageComming();
+    }
+    QString curFileName(){return fileImgDesc.files.at(curIndex);}
 
+    virtual ~VirtualCapOpr();
 protected:
     bool    grabFrame();
     void    trigger2();
@@ -37,6 +44,7 @@ private:
     bool           bOpened;
     fileImageDesc  fileImgDesc;
     int curIndex;
+    int m_mode;
 
 
 };

@@ -32,6 +32,7 @@ protected:
 
 public slots:
     void btnClicked();
+    void restValues();
     void upDateUI(HandleMsg* msg);
 
 private:

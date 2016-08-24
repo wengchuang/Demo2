@@ -42,7 +42,6 @@ public:
     bool  constructHandleMsg(const HandleMsg& msg,IAlgorithm* pAlgo = NULL);
     bool  handlerManagerUninit();
     ~HandlerManager();
-
 protected:
     void run();
 

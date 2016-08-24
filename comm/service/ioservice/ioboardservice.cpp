@@ -2,6 +2,7 @@
 #include "deviceoprmanager.h"
 #include "mudbusdatadef.h"
 #include "mudbusmaster.h"
+#include "appconfig.h"
 
 IOBoardService* IOBoardService::instance = NULL;
 
@@ -53,7 +54,7 @@ bool IOBoardService::sendWriteWindCmd(unsigned char status)
 
     ret =  MudbusMaster::send15Code(transferOpr,usrData);
     if(ret && status !=0){
-        emit startOprTimer(20);
+        emit startOprTimer(Appconfig::outPutTimeOut);
     }
     return ret;
 

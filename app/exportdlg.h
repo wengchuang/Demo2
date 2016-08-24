@@ -14,6 +14,9 @@ class ExportDlg : public BaseDialog
     Q_OBJECT
 public:
     explicit ExportDlg(QWidget *parent = 0);
+    void setSamples(const QVector<double>& samples);
+signals:
+    void resetReport();
 private slots:
     void btnClicked();
 protected:
@@ -26,6 +29,7 @@ private:
     QTableWidget* tableWidget;
     Barchart*     barchart;
     QDateTime     oldTime;
+    QVector<double> samples;
 };
 
 #endif // EXPORTDLG_H

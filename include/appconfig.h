@@ -30,14 +30,20 @@ public:
     bool              getSerialPortName(QString& portName);
     bool              setSerialPortName(const QString& portName);
     bool              getLineCfg(LineCfg& cfg);
+    bool              setLineCfg(const LineCfg& cfg);
     bool              getVirtualCapoprDir(QString& loadPath);
+    bool              getTimeOut(int& value);
+    bool              setTimeOut(const int& value);
 
     QStringList       videoLibsNames();
     QString           getCfgProcesser();
     QString           getCfgRender();
+    static            LineCfg lineCfg;
+    static            int outPutTimeOut;
 private:
     explicit        Appconfig(QObject *parent = 0);
 signals:
+    void            lineCfgChanaged();
 
 public slots:
 private:

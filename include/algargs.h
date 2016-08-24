@@ -25,6 +25,7 @@ struct DataItem{
     Mat                      mat;
     unsigned long           offset;
     T_AttachData            attachData;
+    int                     videoMode;
     bool                    reverseRGB;
 
 };
