@@ -121,82 +121,104 @@ static long ClasifyRect(const vector<Rect>&srcRectLst,vector<Rect>&blackRect,vec
     return 1;
 }
 
-static long DetectTileLine(Mat& srcImg,Rect& roiRect,vector<Rect>&blakRectLst,vector<Rect>&redRectLst)
+static long GetRoiRect(Mat&grayImg,Rect&roiRect)
 {
-    long width = srcImg.cols;
-    long height = srcImg.rows;
-    Mat grayImg;
-    cvtColor(srcImg,grayImg,CV_BGR2GRAY);
+    if (grayImg.empty())
+        return 0;
     Mat canyImg;
-    Canny(grayImg,canyImg,80,160);
+    Canny(grayImg, canyImg, 80, 160);
 
-    uchar pData[9]={0,0,0,1,1,1,0,0,0};
-    Mat kernelImg = Mat(3,3,CV_8UC1,pData);
-    dilate(canyImg,canyImg,kernelImg);
+    uchar pData[9] = { 0, 0, 0, 1, 1, 1, 0, 0, 0 };
+    Mat kernelImg = Mat(3, 3, CV_8UC1, pData);
+    dilate(canyImg, canyImg, kernelImg);
 
     vector<vector<Point>>contours;
     FindContours(canyImg,contours);
-        if(contours.empty())
-           return 0;
+    if (contours.empty())
+        return 0;
 
     Rect tempRect;
-    int rectWidth =0;
-    int index =0;
-    for(int i=0;i<contours.size();i++)
+    int rectWidth = 0;
+    int index = 0;
+    for (int i = 0; i<contours.size(); i++)
     {
         tempRect = boundingRect(contours[i]);
-        if(tempRect.width>rectWidth)
+        if (tempRect.width>rectWidth)
         {
             rectWidth = tempRect.width;
             index = i;
         }
-
     }
     roiRect = boundingRect(contours[index]);
-    if(roiRect.width<width*2/3||roiRect.height<50)
-            return 0;
-    vector<Point> hull;
-    convexHull(contours[index],hull);
-    Mat maskImg = 255*Mat::ones(grayImg.size(),CV_8UC1);
-    DrawContour(maskImg,hull,Scalar(0),-1,8);
+    if (roiRect.width < grayImg.cols * 3 / 4 || roiRect.height < 30)
+        return 0;
+    return 1;
+}
 
-
-
-    Mat otsuImg = Mat::zeros(grayImg.size(),CV_8UC1);
-    Mat bwImg = Mat::zeros(grayImg.size(),CV_8UC1);
-    Mat bwImg2 = Mat::zeros(grayImg.size(),CV_8UC1);
-
-
-
+static long GetTileAngle(Mat&srcImg,Mat&otsuImg,float &angle)
+{
+    vector<vector<Point>>contours;
+    FindContours(otsuImg, contours);
+    Rect tempRect;
+    int rectWidth = 0;
+    int index = 0;
+    for (int i = 0; i<contours.size(); i++)
+    {
+        tempRect = boundingRect(contours[i]);
+        if (tempRect.width>rectWidth)
+        {
+            rectWidth = tempRect.width;
+            index = i;
+        }
+    }
     RotatedRect rtRect = minAreaRect(contours[index]);
     Point2f pntLst[4];
-    float rotAng = 0;
     rtRect.points(pntLst);
 
     for (int i = 0; i<4; i++)
     {
         line(srcImg, pntLst[i], pntLst[(i + 1) % 4], Scalar(0, 255, 0), 2);
     }
-    if(fabs(pntLst[0].x-pntLst[1].x)>fabs(pntLst[0].x-pntLst[3].x))
-        rotAng = atan((pntLst[0].y-pntLst[1].y)/(pntLst[0].x-pntLst[1].x));
+    if (fabs(pntLst[0].x - pntLst[1].x)>fabs(pntLst[0].x - pntLst[3].x))
+        angle = atan((pntLst[0].y - pntLst[1].y) / (pntLst[0].x - pntLst[1].x));
     else
-        rotAng = atan((pntLst[0].y-pntLst[3].y)/(pntLst[0].x-pntLst[3].x));
-    rotAng *=180/CV_PI;
+        angle = atan((pntLst[0].y - pntLst[3].y) / (pntLst[0].x - pntLst[3].x));
+    angle *= 180 / CV_PI;
+    return 1;
+}
+
+static long DetectTileLine(Mat& srcImg,Rect& roiRect,vector<Rect>&blakRectLst,vector<Rect>&redRectLst)
+{
+    long width = srcImg.cols;
+    long height = srcImg.rows;
+    Mat grayImg;
+    cvtColor(srcImg,grayImg,CV_BGR2GRAY);
+    if (!GetRoiRect(grayImg, roiRect))
+        return 0;
+    Mat roiImg = Mat(grayImg, roiRect);
+    Mat otsuImg = Mat::zeros(grayImg.size(),CV_8UC1);
+    threshold(roiImg, Mat(otsuImg, roiRect), 0, 255, CV_THRESH_OTSU);
+
+    float rotAng = 0;
+    GetTileAngle(srcImg, otsuImg, rotAng);
+
     Point2f center;
-    center.x=float(width/2.0+0.5);
-    center.y=float(height/2.0+0.5);
+    center.x = float(width / 2.0 + 0.5);
+    center.y = float(height / 2.0 + 0.5);
     //计算二维旋转的仿射变换矩阵
-    Mat M = getRotationMatrix2D( center, rotAng,1);
+    Mat M = getRotationMatrix2D(center, rotAng, 1);
     Mat img_rotate;
     //变换图像，并用黑色填充其余值
-    warpAffine(grayImg,img_rotate, M,grayImg.size());
+    warpAffine(grayImg, img_rotate, M, grayImg.size());
     //threshold(img_rotate,otsuImg,0,255,CV_THRESH_OTSU);
+
+    Mat bwImg = Mat::zeros(grayImg.size(),CV_8UC1);
+    Mat bwImg2 = Mat::zeros(grayImg.size(),CV_8UC1);
 
     threshold(Mat(img_rotate,roiRect),Mat(bwImg,roiRect),30,255,CV_THRESH_OTSU);
     Canny(Mat(img_rotate,roiRect),Mat(bwImg2,roiRect),80,160);
     Mat roiCanny = Mat(bwImg2,roiRect);
 
-    //imwrite("H:\\cannyImg.jpg",canyImg);
     //imwrite("H:\\otsuImg.jpg",otsuImg);
     //imwrite("H:\\bwImg.jpg",bwImg);
     //imwrite("H:\\bwImg2.jpg",bwImg2);
@@ -223,7 +245,9 @@ static long DetectTileLine(Mat& srcImg,Rect& roiRect,vector<Rect>&blakRectLst,ve
     threshold(Img2,Img2,100,255,CV_THRESH_BINARY);
 
     rectangle(srcImg,roiRect,Scalar(255,255,0),2);
+    vector<vector<Point>>contours;
     FindContours(Img2,contours);
+    Rect tempRect;
     vector<Rect> lineRect;
     vector<Rect> cmbRectLst;
     for(int i=0;i<contours.size();i++)
@@ -241,6 +265,7 @@ static long DetectTileLine(Mat& srcImg,Rect& roiRect,vector<Rect>&blakRectLst,ve
     ClasifyRect(cmbRectLst,blakRectLst,redRectLst);
     return 1;
 }
+
 
 
 SimpleAlgo::SimpleAlgo(const QString& name,QObject *parent) : IAlgorithm(name,parent)

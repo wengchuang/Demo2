@@ -26,6 +26,7 @@ int main(int argc,char*argv[])
 
     MainWindown win;
     win.showMaximized();
+    app.setAutoSipEnabled(true);
 
     ret = app.exec();
 

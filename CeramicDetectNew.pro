@@ -83,9 +83,9 @@ SOURCES += \
     app/mysliderbutton.cpp \
     app/mygauge2.cpp \
     app/exportdlg.cpp \
-    Barchart.cpp \
     video/capture/virtualcapopr.cpp \
-    fileopr.cpp
+    util/file/fileopr.cpp \
+    app/Barchart.cpp
 
 
 HEADERS += \
@@ -141,9 +141,8 @@ HEADERS += \
     app/mygauge2.h \
     debugredirect.h \
     app/exportdlg.h \
-    Barchart.h \
     video/include/virtualcapopr.h \
-    fileopr.h
+    app/barchart.h
 
 FORMS +=
 

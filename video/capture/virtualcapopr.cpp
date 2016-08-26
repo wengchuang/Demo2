@@ -3,6 +3,7 @@
 #include <QFileInfo>
 #include <QImage>
 #include <QDebug>
+#include "fileopr.h"
 
 VirtualCapOpr::VirtualCapOpr(const QString& name,QObject *parent):ICaptureOpr(name,parent)
 {
@@ -122,29 +123,34 @@ void VirtualCapOpr::chanageReslution()
         this->iHeight = fileImgDesc.imageSizes.at(curIndex).iHeight;
 
     }else{
-        ImgSize size;
-        QImage image(fileImgDesc.files.at(curIndex));
-        size.iWidth = image.width();
-        size.iHeight = image.height();
-        fileImgDesc.imageSizes.append(size);
-        this->iHeight = size.iHeight;
-        this->iWidth =  size.iWidth;
+        if(FileOpr::isFileExists(fileImgDesc.files.at(curIndex))){
+            ImgSize size;
+            QImage image(fileImgDesc.files.at(curIndex));
+            size.iWidth = image.width();
+            size.iHeight = image.height();
+            fileImgDesc.imageSizes.append(size);
+            this->iHeight = size.iHeight;
+            this->iWidth =  size.iWidth;
+        }
     }
 
 }
 bool VirtualCapOpr::grabFrame()
 {
-    QImage image(fileImgDesc.files.at(curIndex));
-    QImage img = image.convertToFormat(QImage::Format_RGB888);
+    bool ret = false;
+    if(FileOpr::isFileExists(fileImgDesc.files.at(curIndex))){
+        QImage image(fileImgDesc.files.at(curIndex));
+        QImage img = image.convertToFormat(QImage::Format_RGB888);
 
-    memcpy(this->picData.data(),img.bits(),this->picData.size());
-
+        memcpy(this->picData.data(),img.bits(),this->picData.size());
+        this->reverseRGB = false;
+        ret = true;
+    }
     curIndex++;
     if(curIndex == fileImgDesc.files.count()){
         curIndex = 0;
     }
-    this->reverseRGB = false;
-    return true;
+    return ret;
 }
 void VirtualCapOpr::trigger2()
 {

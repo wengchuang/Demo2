@@ -7,7 +7,7 @@ namespace FileOpr {
 
 void fileOprMkdir(const QString& dirName);
 bool deleteDir(const QString& path);
-
+bool isFileExists(const QString& fileName);
 }
 
 

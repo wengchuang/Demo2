@@ -32,16 +32,8 @@ char DemoHandler2::matchOutPut(int& width,int& redX,int& blackCnt)
     int redRes = -1;
     char ret;
     if(redX != -1){
-        qDebug()<<"redX" << redX ;
-        qDebug()<<"max width"<<width;
-        qDebug()<<"delta"<<delta;
-        for(int i = 1;i < cnt; i++ ){
-           if((i*delta < redX) && ((i+1)*delta > redX)){
-              redRes = i;
-              break;
-           }
+        redRes = (int) (redX / delta);
 
-        }
 
     }else if(blackCnt != -1){
         qDebug()<< "blackLine cnt :"<<blackCnt;

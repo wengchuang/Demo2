@@ -28,6 +28,7 @@ void ExportDlg::showEvent(QShowEvent *ev)
     if(parent){
         QRect rect = parent->geometry();
         this->setGeometry(rect.x()+rect.width()/4,rect.y()+rect.height()/4,rect.width()/2,510);
+        qDebug()<<this->geometry();
     }
 
     if(barchart){

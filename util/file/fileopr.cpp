@@ -13,6 +13,11 @@ void fileOprMkdir(const QString &dirName)
         dir.mkpath(dirName);
     }
 }
+bool isFileExists(const QString& fileName)
+{
+    QFile file(fileName);
+    return file.exists();
+}
 
 bool deleteDir(const QString& path){
 
