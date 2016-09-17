@@ -8,6 +8,7 @@ class SimpleAlgo : public IAlgorithm
 public:
    explicit SimpleAlgo(const QString& name,QObject *parent = 0);
    virtual ~SimpleAlgo();
+   bool isGood(void* pCompareData);
    int algoExec(Mat& mat , void* args = NULL);
    int constructRetMsg(void* buf, int& length);
 private:

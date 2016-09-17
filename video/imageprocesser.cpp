@@ -5,7 +5,8 @@
 #include "cameraparameterdef.h"
 #include "fileopr.h"
 #include <QDate>
-#include<highgui.h>
+#include <highgui.h>
+#include <appconfig.h>
 
 
 
@@ -19,6 +20,7 @@ ImageProcesser::ImageProcesser(QObject *parent) :
       algoItem = NULL;
       isAlgoInit = false;
       picIndex = 0;
+      bgd = true;
       FileOpr::fileOprMkdir(recordFilePath);
 }
 void ImageProcesser::installAlgo(IAlgorithm* algo)
@@ -63,13 +65,23 @@ bool ImageProcesser::algoInit()
 }
 void ImageProcesser::recordResault(DataItem* item)
 {
-    QString dirName = QString(RECORDFILEPATH) + QString("/") + QDate::currentDate().toString("yyyy_MM_dd");
-    FileOpr::fileOprMkdir(dirName);
-    QString fileName = dirName + "/" + "record" + QString::number(picIndex++) +".jpg";
+    QString dirName;
+    QString fileName;
     if(item->reverseRGB){
         cvtColor(item->orgMat,item->orgMat,CV_BGR2RGB);
     }
-    imwrite(fileName.toStdString(),item->orgMat);
+    if(bgd){
+        dirName = QString(RECORDFILEPATH) + QString("/") + QDate::currentDate().toString("yyyy_MM_dd") + "/good";
+        FileOpr::fileOprMkdir(dirName);
+        fileName = dirName + "/" + "record" + QString::number(picIndex++) +".jpg";
+        imwrite(fileName.toStdString(),item->orgMat);
+    }else{
+        dirName = QString(RECORDFILEPATH) + QString("/") + QDate::currentDate().toString("yyyy_MM_dd") + "/ng";
+        FileOpr::fileOprMkdir(dirName);
+        fileName = dirName + "/" + "record" + QString::number(picIndex++) +".jpg";
+        imwrite(fileName.toStdString(),item->orgMat);
+
+    }
 }
 
 void ImageProcesser::processImage()
@@ -110,6 +122,9 @@ void ImageProcesser::processImage()
                     cvtColor(item->mat,item->mat,CV_BGR2RGB);
                 }
                 if(item->videoMode == Camera::MODE_EXTERN){
+                    if(Appconfig::bDebugMode){
+                       bgd = algoItem->isGood(&(Appconfig::dbgLineCnt));
+                    }
                     recordResault(item);
                 }
 

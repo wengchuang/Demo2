@@ -15,5 +15,6 @@ public:
     virtual int algoExec(Mat& mat , void* args = NULL) = 0;
     virtual int constructRetMsg(void* buf, int& length){Q_UNUSED(buf);Q_UNUSED(length);  return 0;}
     virtual bool _algoExit(){return true;}
+    virtual bool isGood(void* pCompareData){return true;}
 };
 #endif // IALGORITHM_H

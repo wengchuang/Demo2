@@ -12,7 +12,11 @@ typedef struct{
     QList<int>     redIndexs;
     QMap<int,int>  blackmap;
 }LineCfg;
-
+typedef struct{
+    int redLineCnt;
+    int redLinePos;
+    int blackLineCnt;
+}DebugLineCnt;
 class Appconfig : public QObject
 {
     Q_OBJECT
@@ -34,12 +38,15 @@ public:
     bool              getVirtualCapoprDir(QString& loadPath);
     bool              getTimeOut(int& value);
     bool              setTimeOut(const int& value);
+    bool              isDebugMode();
 
     QStringList       videoLibsNames();
     QString           getCfgProcesser();
     QString           getCfgRender();
     static            LineCfg lineCfg;
+    static            DebugLineCnt dbgLineCnt;
     static            int outPutTimeOut;
+    static            bool  bDebugMode;
 private:
     explicit        Appconfig(QObject *parent = 0);
 signals:

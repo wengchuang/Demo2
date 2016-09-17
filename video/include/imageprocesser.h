@@ -32,10 +32,12 @@ private:
     QThread         thr;
     bool            isBusy;
     bool            isSnap;
+    bool            isDebugMode;
     bool            isAlgoInit;
     QString         filePath;
     const QString   recordFilePath;
     unsigned long   picIndex;
+    bool            bgd;
 };
 
 #endif // IMAGEPROCESSER_H

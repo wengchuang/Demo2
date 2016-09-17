@@ -155,6 +155,8 @@ void ArgsSetting::UI_uninit()
     }
     ensureBtns.value("LineCfgBtn")->setEnabled(true);
     ensureBtns.value("TimeOutEnsureBtn")->setEnabled(true);
+    ensureBtns.value("debugLineCntBtn")->setEnabled(true);
+
     disconnect(resBox,SIGNAL(currentIndexChanged(int)),this,SLOT(comBoxIndexChanaged(int)));
 }
 void ArgsSetting::UI_chanageCapbility()
@@ -914,6 +916,60 @@ void ArgsSetting::contrlLineSlot(int index)
        }
     }
 }
+QLayout* ArgsSetting::debugLineCntLayout()
+{
+    QVBoxLayout* mainLay = new QVBoxLayout;
+    mainLay->addSpacing(10);
+    QGroupBox*gbbox = new QGroupBox(QString::fromLocal8Bit("线数配置"));
+
+    QVBoxLayout* vLay = new QVBoxLayout;
+    QHBoxLayout* hLay = new QHBoxLayout;
+    hLay->addStretch(1);
+    QLabel* lab = new QLabel(QString::fromLocal8Bit("红线条数"));
+    QSpinBox* sbBox = new QSpinBox;
+    sbBox->setRange(0,8);
+    spBoxs.insert("redCnt",sbBox);
+    hLay->addWidget(lab);
+    hLay->addWidget(sbBox);
+    hLay->addStretch(1);
+
+    lab = new QLabel(QString::fromLocal8Bit("红线位置"));
+    sbBox = new QSpinBox;
+    sbBox->setRange(0,8);
+    spBoxs.insert("redPos",sbBox);
+    hLay->addWidget(lab);
+    hLay->addWidget(sbBox);
+    hLay->addStretch(1);
+
+    vLay->addLayout(hLay);
+
+
+    hLay = new QHBoxLayout;
+    hLay->addStretch(1);
+    lab = new QLabel(QString::fromLocal8Bit("黑线条数"));
+    sbBox = new QSpinBox;
+    sbBox->setRange(0,8);
+    spBoxs.insert("blackCnt",sbBox);
+    hLay->addWidget(lab);
+    hLay->addWidget(sbBox);
+    hLay->addStretch(1);
+    vLay->addLayout(hLay);
+
+
+    hLay = new QHBoxLayout;
+    hLay->setAlignment(Qt::AlignRight);
+    QPushButton* btn = new QPushButton(QString::fromLocal8Bit("确定"));
+    connect(btn,SIGNAL(clicked()),this,SLOT(btnClicked()));
+    ensureBtns.insert("debugLineCntBtn",btn);
+    setPushBtnStyle(btn);
+    hLay->addWidget(btn);
+    vLay->addLayout(hLay);
+
+    gbbox->setLayout(vLay);
+    setGroupBoxStyle(gbbox);
+    mainLay->addWidget(gbbox);
+    return mainLay;
+}
 
 QLayout* ArgsSetting::createOutputCfgLayout()
 {
@@ -1118,6 +1174,17 @@ void ArgsSetting::createWidgets()
 
     IOArgsWidget->setLayout(vLay);
 
+
+    debugWidget = new QWidget();
+    vLay = new QVBoxLayout;
+    vLay->setAlignment(Qt::AlignCenter);
+
+    vLay->addLayout(debugLineCntLayout());
+
+
+    debugWidget->setLayout(vLay);
+
+
 }
 void ArgsSetting::btnClicked()
 {
@@ -1199,6 +1266,14 @@ void ArgsSetting::btnClicked()
         Appconfig::getInstance()->setLineCfg(cfg);
     }else if(btn == ensureBtns.value("TimeOutEnsureBtn")){
         Appconfig::getInstance()->setTimeOut(timeOutSpBox->text().remove("ms").toInt());
+    }else if(btn == ensureBtns.value("debugLineCntBtn")){
+        Appconfig::dbgLineCnt.redLineCnt= spBoxs.value("redCnt")->text().toInt();
+        Appconfig::dbgLineCnt.redLinePos= spBoxs.value("redPos")->text().toInt();
+        Appconfig::dbgLineCnt.blackLineCnt = spBoxs.value("blackCnt")->text().toInt();
+
+        qDebug()<<Appconfig::dbgLineCnt.redLineCnt;
+        qDebug()<<Appconfig::dbgLineCnt.redLinePos;
+        qDebug()<<Appconfig::dbgLineCnt.blackLineCnt;
     }
 
 }
@@ -1216,6 +1291,7 @@ QLayout* ArgsSetting::createLayout()
                     QTabBar::tab:!selected{margin-top: 2px;}");
     tabWidget->addTab(cameraArgsWidget,QString::fromLocal8Bit("相机参数"));
     tabWidget->addTab(IOArgsWidget,QString::fromLocal8Bit("IO板参数"));
+    tabWidget->addTab(debugWidget,QString::fromLocal8Bit("调试设置"));
     mainLay->addWidget(tabWidget);
     return mainLay;
 

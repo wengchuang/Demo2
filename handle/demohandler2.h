@@ -9,7 +9,6 @@ class DemoHandler2 : public IHandler
 public:
     bool handlerInit();
     bool handlerUninit();
-
     bool handlerExec(void* buf,const int& length);
     bool hasUIItem(){return bUIData;}
     char matchOutPut(int& width,int& redX,int& blackCnt);

@@ -46,7 +46,7 @@ private:
     QLayout* createRedLineCfgLayout(const LineCfg& lineCfg);
     QLayout* createBlackLineCfgLayout(const LineCfg& lineCfg);
     QLayout* createOutputCfgLayout();
-
+    QLayout* debugLineCntLayout();
 
 
     QWidget* createAutoWidget();
@@ -56,6 +56,7 @@ private:
 private:
     QWidget*    cameraArgsWidget;
     QWidget*    IOArgsWidget;
+    QWidget*    debugWidget;
 
     QWidget*    autoWidget;
     QWidget*    externTriggerWidget;
@@ -67,6 +68,7 @@ private:
     QMap<QString,QLineEdit*>          valueMap;
     QMap<QString, QPushButton*>    defaultBtns;
     QMap<QString, QPushButton*>    ensureBtns;
+    QMap<QString, QSpinBox*>         spBoxs;
     QPushButton* snapBtn;
     QPushButton* pathBtn;
     QPushButton* IOPullBtn;

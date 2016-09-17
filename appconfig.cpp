@@ -5,6 +5,10 @@
 Appconfig* Appconfig::instance = NULL;
 LineCfg  Appconfig::lineCfg;
 int  Appconfig::outPutTimeOut;
+DebugLineCnt Appconfig::dbgLineCnt;
+bool  Appconfig::bDebugMode;
+
+
 
 Appconfig* Appconfig::getInstance()
 {
@@ -33,10 +37,12 @@ Appconfig::Appconfig(QObject *parent) :
         writer->setValue("LineCfg/BlackChannelIndexs",QVariant(QStringList()<<"4"<<"5"<<"6"<<"7"<<"8"));
 
         writer->setValue("Device/SerialPortName","com4");
+        writer->setValue("DebugConfig/debugMode",0);
         writer->setValue("Device/OutPutTimeOut",QVariant(20));
     }
     getLineCfg(lineCfg);
     getTimeOut(outPutTimeOut);
+    bDebugMode = isDebugMode();
 }
 bool  Appconfig::setExpoGainCfg(const QString& capName,const T_CameraCapbility& tCapbility)
 {
@@ -225,7 +231,10 @@ bool Appconfig::setAdjColorCfg(const QString& capName,const T_CameraCapbility& t
     }
     return true;
 }
-
+bool Appconfig::isDebugMode()
+{
+    return writer->value("DebugConfig/debugMode").toBool();
+}
 bool  Appconfig::useVideoLib()
 {
     return writer->value("LibConfig/useLib").toBool();
