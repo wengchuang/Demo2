@@ -19,6 +19,24 @@ static long FindContours(const Mat & bwImg, vector<vector<Point>>& contours)
         return 0;
     return 1;
 }
+static long FindMaxLenContour(vector<vector<Point>>& contours,long&index)
+{
+    if(contours.empty())
+        return 0;
+    long rectWidth =0;
+    Rect tempRect;
+    index =0;
+    for (int i = 0; i<contours.size(); i++)
+    {
+        tempRect = boundingRect(contours[i]);
+        if (tempRect.width>rectWidth)
+        {
+            rectWidth = tempRect.width;
+            index = i;
+        }
+    }
+    return 1;
+}
 static long DrawContour(Mat& srcImg,vector<Point>& contour,Scalar clr,int thickness,int linetype)
 {
     if(contour.empty())
@@ -95,7 +113,7 @@ static long CombineRect(long imgWidth,long imgHeight,vector<Rect>&srcRectLst,vec
     Rect extendRect;
     for(int i = 0; i<srcRectLst.size();i++ )
     {
-        GetExtendRect(srcRectLst[i],extendRect,imgWidth,imgHeight,10,20);
+        GetExtendRect(srcRectLst[i],extendRect,imgWidth,imgHeight,7,20);
         Mat(maskImg,extendRect).setTo(255);
     }
     vector<vector<Point>> contours;
@@ -108,161 +126,77 @@ static long CombineRect(long imgWidth,long imgHeight,vector<Rect>&srcRectLst,vec
     }
     return 1;
 }
-static long ClasifyRect(const vector<Rect>&srcRectLst,vector<Rect>&blackRect,vector<Rect>&RedRect)
+static long ClasifyRect(Mat& rotateImg,const vector<Rect>&srcRectLst,vector<Rect>&blackRect,vector<Rect>&RedRect)
 {
     blackRect.clear();
     RedRect.clear();
+    Mat pBgrImg[3];
     for(int i=0;i<srcRectLst.size();i++)
     {
-        if(srcRectLst[i].height>srcRectLst[i].width)
+        if (srcRectLst[i].height*1.5<srcRectLst[i].width&&srcRectLst[i].width>50)
+            RedRect.push_back(srcRectLst[i]);
+        else if(srcRectLst[i].height>srcRectLst[i].width*1.5)
             blackRect.push_back(srcRectLst[i]);
         else
-            RedRect.push_back(srcRectLst[i]);
+        {
+            Mat subImg = Mat(rotateImg,srcRectLst[i]);
+            split(subImg,pBgrImg);
+            Mat RedImg = pBgrImg[2];
+            Mat bwImg;
+            threshold(RedImg,bwImg,150,255,CV_THRESH_BINARY);
+            if(countNonZero(bwImg)>50)
+                RedRect.push_back(srcRectLst[i]);
+            else
+                blackRect.push_back(srcRectLst[i]);
+        }
     }
     return 1;
 }
-#if 0
-static long GetRoiRect(Mat&grayImg,Rect& detectRect,Rect&roiRect)
-{
-    if (grayImg.empty())
-        return 0;
-    Mat canyImg = Mat::zeros(grayImg.size(),CV_8UC1);
-    Canny(Mat(grayImg,detectRect), Mat(canyImg,detectRect), 70, 140);
-
-    uchar pData[9] = { 0, 0, 0, 1, 1, 1, 0, 0, 0 };
-    Mat kernelImg = Mat(3, 3, CV_8UC1, pData);
-    dilate(canyImg, canyImg, kernelImg);
-    //imwrite("D:\\canyImg.jpg",canyImg);
-    vector<vector<Point>>contours;
-    FindContours(canyImg,contours);
-    if (contours.empty())
-        return 0;
-
-    Rect tempRect;
-    int rectWidth = 0;
-    int index = 0;
-    for (int i = 0; i<contours.size(); i++)
-    {
-        tempRect = boundingRect(contours[i]);
-        if (tempRect.width>rectWidth)
-        {
-            rectWidth = tempRect.width;
-            index = i;
-        }
-    }
-    roiRect = boundingRect(contours[index]);
-    if (roiRect.width>grayImg.cols * 3 / 4 && roiRect.height >30)
-        return 1;
-    return 0;
-}
-#endif
 static float GetPntDistance(Point& pt1,Point& pt2)
 {
     float d1 = sqrt(float((pt1.x-pt2.x)*(pt1.x-pt2.x)+ (pt1.y-pt2.y)*(pt1.y-pt2.y)));
     return d1;
 }
-#if 0
-static long GetTileAngle(Mat&srcImg,Rect& roiRect,float &angle)
-{
-    vector<vector<Point>>contours;
-    Mat grayImg;
-    cvtColor(srcImg,grayImg,CV_BGR2GRAY);
-    Mat canyImg = Mat::zeros(grayImg.size(),CV_8UC1);
-    Canny(Mat(grayImg,roiRect), Mat(canyImg,roiRect), 60, 120);
-
-    vector<Vec2f> lines;
-    HoughLines(canyImg, lines, 1, CV_PI/360, 200);
-    float lineLen =0;
-    long index = 0;
-    Point sPnt,ePnt;
-    for (size_t i=0; i<lines.size(); i++)
-    {
-        float rho = lines[i][0];
-        float theta = lines[i][1];
-        Point pt1,pt2;
-        double a=cos(theta);
-        double b=sin(theta);
-        double x0 = rho*a;
-        double y0 = rho*b;
-        pt1.x = cvRound(x0+1000*(-b));
-        pt1.y = cvRound(y0+1000*a);
-        pt2.x = cvRound(x0-1000*(-b));
-        pt2.y = cvRound(y0-1000*a);
-
-        float tempLineLen =GetPntDistance(pt1,pt2);
-        if(tempLineLen>lineLen)
-        {
-            index =i;
-            lineLen = tempLineLen;
-            sPnt = pt1;
-            ePnt = pt2;
-        }
-    }
-
-    //line(srcImg, sPnt, ePnt, Scalar(0,0,255), 3, CV_AA);
-    angle = atan(float(sPnt.y - ePnt.y) / (sPnt.x - ePnt.x));
-    angle *= 180 / CV_PI;
-    /*FindContours(otsuImg, contours);
-    Rect tempRect;
-    int rectWidth = 0;
-    int index = 0;
-    for (int i = 0; i<contours.size(); i++)
-    {
-        tempRect = boundingRect(contours[i]);
-        if (tempRect.width>rectWidth)
-        {
-            rectWidth = tempRect.width;
-            index = i;
-        }
-    }
-    RotatedRect rtRect = minAreaRect(contours[index]);
-    Point2f pntLst[4];
-    rtRect.points(pntLst);
-
-    for (int i = 0; i<4; i++)
-    {
-        line(srcImg, pntLst[i], pntLst[(i + 1) % 4], Scalar(0, 255, 0), 2);
-    }
-    if (fabs(pntLst[0].x - pntLst[1].x)>fabs(pntLst[0].x - pntLst[3].x))
-        angle = atan((pntLst[0].y - pntLst[1].y) / (pntLst[0].x - pntLst[1].x));
-    else
-        angle = atan((pntLst[0].y - pntLst[3].y) / (pntLst[0].x - pntLst[3].x));
-    angle *= 180 / CV_PI;*/
-
-    return 1;
-}
-#endif
-
 
 static long GetRoiRect(Mat&grayImg,Rect& detectRect,Rect&roiRect)
 {
     if (grayImg.empty())
         return 0;
     Mat canyImg = Mat::zeros(grayImg.size(),CV_8UC1);
-    Canny(Mat(grayImg,detectRect), Mat(canyImg,detectRect), 70, 140);
-
-    uchar pData[9] = { 0, 0, 0, 1, 1, 1, 0, 0, 0 };
-    Mat kernelImg = Mat(3, 3, CV_8UC1, pData);
-    dilate(canyImg, canyImg, kernelImg);
-    //imwrite("H:\\canyImg.jpg",canyImg);
+    Canny(Mat(grayImg,detectRect), Mat(canyImg,detectRect), 60, 140);
+    //imwrite("H:\\lujin\\canyImg0.jpg",canyImg);
+    Mat kernelImg = (Mat_<uchar>(3,3) << 1, 1, 1, 1, 1, 1, 1, 1, 1);
+    dilate(canyImg, canyImg, kernelImg,Point(-1,-1),3);
     vector<vector<Point>>contours;
     FindContours(canyImg,contours);
     if (contours.empty())
         return 0;
+    //imwrite("H:\\lujin\\canyImg1.jpg",canyImg);
+    FindContours(canyImg,contours);
 
-    Rect tempRect;
     int rectWidth = 0;
-    int index = 0;
+    long index = 0;
+    Rect tempRect;
+    Mat markImg = Mat::zeros(grayImg.size(),CV_8UC1);
     for (int i = 0; i<contours.size(); i++)
     {
         tempRect = boundingRect(contours[i]);
-        if (tempRect.width>rectWidth)
+        if (tempRect.width>tempRect.height*3&&tempRect.height<200)
         {
-            rectWidth = tempRect.width;
-            index = i;
+            rectangle(markImg,tempRect,Scalar(255),40);
         }
     }
+    //imwrite("H:\\lujin\\markImg.jpg",markImg);
+    FindContours(markImg,contours);
+    FindMaxLenContour(contours,index);
     roiRect = boundingRect(contours[index]);
+    Mat cutImg = Mat::zeros(grayImg.size(),CV_8UC1);
+    canyImg.rowRange(roiRect.y,roiRect.y+roiRect.height).copyTo(cutImg.rowRange(roiRect.y,roiRect.y+roiRect.height));
+    FindContours(cutImg,contours);
+    FindMaxLenContour(contours,index);
+    Rect cutRect = boundingRect(contours[index]);
+    if(cutRect.width>roiRect.width)
+        roiRect = cutRect;
     GetExtendRect(roiRect, roiRect, grayImg.cols, grayImg.rows,0,10);
     if (roiRect.width>grayImg.cols/2 && roiRect.height >30)
         return 1;
@@ -273,9 +207,12 @@ static long GetTileAngle(Mat&srcImg,Rect& roiRect,float &angle)
     vector<vector<Point>>contours;
     Mat grayImg;
     cvtColor(srcImg,grayImg,CV_BGR2GRAY);
+    medianBlur(grayImg,grayImg,3);
     Mat canyImg = Mat::zeros(grayImg.size(),CV_8UC1);
-    Canny(Mat(grayImg,roiRect), Mat(canyImg,roiRect), 50, 120);
-
+    Canny(Mat(grayImg,roiRect), Mat(canyImg,roiRect), 50, 100);
+    Mat kernelImg = (Mat_<uchar>(3,3) << 1, 1, 1, 1, 1, 1, 1, 1, 1);
+    dilate(canyImg, canyImg, kernelImg,Point(-1,-1),1);
+    //imwrite("H:\\lujin\\lineDetect.jpg",canyImg);
     vector<Vec4i> lines;
     HoughLinesP(canyImg, lines, 1, CV_PI/180, 30, 70, 15);
     float lineLen =0;
@@ -299,7 +236,7 @@ static long GetTileAngle(Mat&srcImg,Rect& roiRect,float &angle)
         }
     }
 
-    line(srcImg, sPnt, ePnt, Scalar(0,0,255), 3, CV_AA);
+    //line(srcImg, sPnt, ePnt, Scalar(0,0,255), 3, CV_AA);
     angle = atan(float(sPnt.y - ePnt.y) / (sPnt.x - ePnt.x));
     angle *= 180 / CV_PI;
     return 1;
@@ -318,9 +255,11 @@ static long RemoveEdge(Mat& cannyImg,Mat& noEdgeImg)
         subImg = cannyImg.colRange(cannyImg.cols*i/8,cannyImg.cols*(i+1)/8);
         subImg2 = noEdgeImg.colRange(cannyImg.cols*i/8,cannyImg.cols*(i+1)/8);
         GetStartEndRow(subImg,subImg.cols/2,startRow,endRow);
+        startRow+=10;
+        endRow-=10;
         gap = endRow - startRow;
-        startRow+=8;
-        endRow-=8;
+        if(gap>15)
+            endRow = startRow+15;
         if(endRow-startRow>5)
             subImg.rowRange(startRow,endRow).copyTo(subImg2.rowRange(startRow,endRow));
     }
@@ -362,10 +301,11 @@ static long DetectTileLine(Mat& srcImg,Rect& roiRect,vector<Rect>&blakRectLst,ve
     center.y = float(height / 2.0 + 0.5);
     //计算二维旋转的仿射变换矩阵
     Mat M = getRotationMatrix2D(center, rotAng, 1);
-    Mat img_rotate;
+    Mat img_rotate,bgr_rotate;
     //变换图像，并用黑色填充其余值
     warpAffine(grayImg, img_rotate, M, grayImg.size());
-    //threshold(img_rotate,otsuImg,0,255,CV_THRESH_OTSU);
+    warpAffine(srcImg, bgr_rotate, M, srcImg.size());
+
 
     Mat bwImg = Mat::zeros(grayImg.size(),CV_8UC1);
     Canny(Mat(img_rotate,roiRect),Mat(bwImg,roiRect),60,160);
@@ -373,8 +313,7 @@ static long DetectTileLine(Mat& srcImg,Rect& roiRect,vector<Rect>&blakRectLst,ve
 
     Mat Img1 = Mat(bwImg,roiRect);
     //imwrite("H:\\lujin\\Img1.jpg",Img1);
-    Mat Img2 = Mat::zeros(Img1.size(),CV_8UC1);
-    //roiCanny.rowRange(startRow,endRow).colRange(startCol,endCol).copyTo(Img2.rowRange(startRow,endRow).colRange(startCol,endCol));
+    Mat Img2;
     RemoveEdge(Img1,Img2);
     //imwrite("H:\\lujin\\Img2.jpg",Img2);
 
@@ -390,7 +329,7 @@ static long DetectTileLine(Mat& srcImg,Rect& roiRect,vector<Rect>&blakRectLst,ve
     for(int i=0;i<contours.size();i++)
     {
         tempRect = boundingRect(contours[i]);
-        if (tempRect.x<50 || tempRect.x + tempRect.width + 50>Img2.cols || (tempRect.width<10 && tempRect.height<10))
+        if (tempRect.x<50 || tempRect.x + tempRect.width + 50>Img2.cols||(tempRect.width<6&&tempRect.height<6))
             continue;
         tempRect.x+=roiRect.x;
         tempRect.y+=roiRect.y;
@@ -399,18 +338,15 @@ static long DetectTileLine(Mat& srcImg,Rect& roiRect,vector<Rect>&blakRectLst,ve
     }
 
     CombineRect(width,height,lineRect,cmbRectLst);
-    ClasifyRect(cmbRectLst,blakRectLst,redRectLst);
-
+    ClasifyRect(bgr_rotate,cmbRectLst,blakRectLst,redRectLst);
     for (int i = 0; i<blakRectLst.size(); i++)
     {
-       rectangle(srcImg, blakRectLst[i], Scalar(0, 0, 255), 2);
+        rectangle(srcImg, blakRectLst[i], Scalar(255, 0, 0), 2);
     }
-
     for (int i = 0; i<redRectLst.size(); i++)
     {
-       rectangle(srcImg, redRectLst[i], Scalar(255, 0, 0), 2);
+        rectangle(srcImg, redRectLst[i], Scalar(0, 0, 255), 2);
     }
-
     return 1;
 }
 
