@@ -72,6 +72,10 @@ private:
     QPushButton* snapBtn;
     QPushButton* pathBtn;
     QPushButton* IOPullBtn;
+    QPushButton* goodBtn;
+    QPushButton* badBtn;
+
+
     QPushButton* portEnsureBtn;
     QComboBox  * portNameComBox;
     QSpinBox*    ioPullTime;

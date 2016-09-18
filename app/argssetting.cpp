@@ -6,12 +6,15 @@
 #include <QSpinBox>
 #include <QComboBox>
 #include <QFileDialog>
+#include <QFile>
 #include <QLineEdit>
+#include <QDate>
 #include "deviceoprmanager.h"
 #include "uarttransferopr.h"
 #include "cameraparameterdef.h"
 
 #include "debugredirect.h"
+#include "fileopr.h"
 
 #define  EXPORESUE      "exporesue"
 #define  GAIN           "gain"
@@ -692,6 +695,20 @@ QWidget* ArgsSetting::createExternTriggerWidget()
     connect(IOPullBtn,SIGNAL(clicked()),this,SLOT(btnClicked()));
     setPushBtnStyle(IOPullBtn);
     hLay->addWidget(IOPullBtn);
+
+
+    goodBtn = new QPushButton(QString::fromLocal8Bit("检测正确"));
+    connect(goodBtn,SIGNAL(clicked()),this,SLOT(btnClicked()));
+    setPushBtnStyle(goodBtn);
+    hLay->addWidget(goodBtn);
+
+    badBtn = new QPushButton(QString::fromLocal8Bit("检测失败"));
+    connect(badBtn,SIGNAL(clicked()),this,SLOT(btnClicked()));
+    setPushBtnStyle(badBtn);
+    hLay->addWidget(badBtn);
+
+
+
     mainLay->addLayout(hLay);
 
 
@@ -1188,6 +1205,8 @@ void ArgsSetting::createWidgets()
 }
 void ArgsSetting::btnClicked()
 {
+
+    static QString disFileName;
     QPushButton* btn = (QPushButton*)sender();
     T_SaveItem tSaveItem;
     memset(&tSaveItem,0,sizeof(T_SaveItem));
@@ -1201,9 +1220,41 @@ void ArgsSetting::btnClicked()
        }
 
     }else if(btn == IOPullBtn){
-        qDebug()<<VideoManager::getInstance()->getCaptureOpr()->curFileName();
-        VideoManager::getInstance()->getCaptureOpr()->virtualTrigger();
+        if(VideoManager::getInstance()->getCaptureOpr()->isOpened()){
+            disFileName=VideoManager::getInstance()->getCaptureOpr()->curFileName();
+            VideoManager::getInstance()->getCaptureOpr()->virtualTrigger();
+        }
 
+
+    }else if(btn == goodBtn){
+        if(VideoManager::getInstance()->getCaptureOpr()->isOpened()){
+            QString dir;
+            Appconfig::getInstance()->getVirtualCapoprDir(dir);
+            dir += "/" + QDate::currentDate().toString("yyyy_MM_dd/")+"good";
+            FileOpr::fileOprMkdir(dir);
+
+            QFileInfo fileInfo(disFileName);
+
+            QFile::copy(disFileName,dir + "/good_"+QTime::currentTime().toString("hh_mm_") + fileInfo.fileName());
+            QFile::remove(disFileName);
+
+        }
+
+    }else if(btn == badBtn){
+
+            if(VideoManager::getInstance()->getCaptureOpr()->isOpened()){
+                QString dir;
+                Appconfig::getInstance()->getVirtualCapoprDir(dir);
+                dir += "/" + QDate::currentDate().toString("yyyy_MM_dd/ng/");
+                FileOpr::fileOprMkdir(dir);
+
+                QFileInfo fileInfo(disFileName);
+
+
+               QFile::copy(disFileName,dir + "/ng_" +QTime::currentTime().toString("hh_mm_")+ fileInfo.fileName());
+               QFile::remove(disFileName);
+
+            }
 
     }else if(btn == portEnsureBtn){
 

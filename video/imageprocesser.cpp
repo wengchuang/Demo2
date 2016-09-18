@@ -121,13 +121,14 @@ void ImageProcesser::processImage()
                 if(item->reverseRGB){
                     cvtColor(item->mat,item->mat,CV_BGR2RGB);
                 }
+#if 0
                 if(item->videoMode == Camera::MODE_EXTERN){
                     if(Appconfig::bDebugMode){
                        bgd = algoItem->isGood(&(Appconfig::dbgLineCnt));
                     }
                     recordResault(item);
                 }
-
+#endif
 
                 HandlerManager::getInstance()->constructHandleMsg(msg,algoItem);
 

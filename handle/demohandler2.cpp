@@ -36,15 +36,15 @@ char DemoHandler2::matchOutPut(int& width,int& redX,int& blackCnt)
 
 
     }else if(blackCnt != -1){
-        qDebug()<< "blackLine cnt :"<<blackCnt;
+        //qDebug()<< "blackLine cnt :"<<blackCnt;
     }
 
     if(redRes != -1){
-        qDebug()<<"redRes:"<<redRes;
+        //qDebug()<<"redRes:"<<redRes;
         ret = Appconfig::lineCfg.redIndexs.at(redRes);
     }else if(blackCnt != -1){
         ret = Appconfig::lineCfg.blackmap.value(blackCnt,-1);
-        qDebug()<<"ret "<<(int)ret;
+        //qDebug()<<"ret "<<(int)ret;
     }
 
     return ret;
@@ -56,7 +56,7 @@ bool DemoHandler2::handlerExec(void* buf,const int& length)
     AlgResData* pAlgData = (AlgResData*)buf;
     int redX = -1;
     int blackCnt = -1;
-    qDebug()<<"pAlgData->redLines:"<< pAlgData->redLines;
+    //qDebug()<<"pAlgData->redLines:"<< pAlgData->redLines;
     if(pAlgData->redLines  == 1){
 
        if(pAlgData->redLines == 1){
